@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>发布内容</title>
+  <style>
+    :root{
+      --bg:#0b0f14;
+      --panel:#ffffff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --border:#e5e7eb;
+      --shadow:0 10px 30px rgba(0,0,0,.18);
+      --radius:18px;
+      --primary:#3b82f6;
+      --primary-600:#2563eb;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:'Microsoft YaHei',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,'PingFang SC',sans-serif;
+      background:radial-gradient(1200px 600px at 10% -10%,#1f8db8 18%, transparent 60%),
+                 radial-gradient(900px 500px at 110% 110%,#2bb8d6 12%, transparent 60%),
+                 var(--bg);
+      color:#fff;
+    }
+    .container{
+      display:grid; grid-template-columns: 220px 1fr; gap:18px;
+      min-height:100vh; padding:24px;
+    }
+    /* 左侧导航 */
+    .sidebar{
+      background:var(--panel); border:1px solid var(--border); border-radius:var(--radius);
+      box-shadow:var(--shadow); padding:20px 16px; color:var(--text);
+      display:flex; flex-direction:column; gap:16px;
+    }
+    .account-info{
+      display:flex; flex-direction:column; align-items:center; gap:10px;
+      text-decoration:none; color:inherit; border:1px dashed #eef2ff; border-radius:14px; padding:14px; background:#fff
+    }
+    .avatar{width:56px;height:56px;border-radius:50%;object-fit:cover}
+    .username{font-weight:700}
+    .nav-list{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:10px}
+    .nav-list a{
+      display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text);
+      border:1px solid var(--border);background:#fafafa;border-radius:12px;padding:10px 14px;transition:.2s background,.2s transform
+    }
+    .nav-list a:hover{background:#f3f4f6;transform:translateY(-1px)}
+    .nav-icon{width:22px;display:inline-flex;justify-content:center}
+
+    /* 右侧发布表单 */
+    .panel{
+      background:var(--panel); border:1px solid var(--border); border-radius:var(--radius);
+      box-shadow:var(--shadow); padding:12px; color:var(--text);
+      display:flex; flex-direction:column; gap:8px; max-width:980px; width:100%;
+    }
+    .panel h2{margin:0; font-size:18px; font-weight:800}
+    .control{display:flex; flex-direction:column; gap:4px; flex:1}
+    label{font-weight:700; color:#111827; font-size:14px; margin-bottom:2px}
+    input[type="text"], textarea, select{
+      border:1px solid var(--border); border-radius:12px; padding:5px 8px; outline:none;
+      font-size:14px; background:#fff;
+    }
+    textarea{min-height:70px; resize:vertical}
+    .file{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+    .file input[type="file"]{display:none}
+    .btn, .file label{
+      display:inline-flex; align-items:center; gap:6px; cursor:pointer;
+      border:1px solid var(--border); background:#fff; color:#111827;
+      border-radius:12px; padding:6px 10px; font-weight:700; transition:.2s background
+    }
+    .btn:hover, .file label:hover{background:#f3f4f6}
+    .btn.primary{color:#fff; background:var(--primary); border-color:var(--primary)}
+    .btn.primary:hover{ background:var(--primary-600); border-color:var(--primary-600) }
+    .hint{color:var(--muted); font-size:13px; margin-top:-2px}
+
+    .preview{display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:6px}
+    .thumb{border:1px solid var(--border); border-radius:12px; overflow:hidden; background:#fff; position:relative}
+    .thumb img{display:block; width:100%; height:100px; object-fit:cover}
+    .msg{min-height:20px; color:#d33; font-size:14px}
+
+    /* 按钮行：两端对齐，左取消右发布 */
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 16px;
+    }
+
+    /* 灰色取消按钮（圆角+轻阴影） */
+    .btn.cancel {
+      background: #f3f4f6;
+      color: #374151;
+      border-color: #d1d5db;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      transition: 0.2s background, 0.2s box-shadow;
+    }
+    .btn.cancel:hover {
+      background: #e5e7eb;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+    }
+
+    /* 作者徽章（头像 + 用户名，右下角） */
+    .author-badge{
+      position:absolute;
+      right:8px; bottom:8px;
+      display:inline-flex; align-items:center; gap:6px;
+      background:rgba(255,255,255,0.96);
+      border:1px solid var(--border);
+      border-radius:999px;
+      padding:4px 8px;
+      box-shadow:0 4px 12px rgba(0,0,0,.10);
+      color:#111827; font-size:12px;
+      max-width:calc(100% - 16px);
+      white-space:nowrap;
+    }
+    .author-badge .author-ava{
+      width:20px; height:20px; border-radius:50%;
+      object-fit:cover; border:1px solid #e5e7eb; background:#fff;
+    }
+    .author-badge .author-name{
+      overflow:hidden; text-overflow:ellipsis;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 左侧导航 -->
+    <div class="sidebar">
+      <a class="account-info" href="profile.html">
+        <img src="" alt="头像" class="avatar">
+        <span class="username">我的账号</span>
+      </a>
+      <ul class="nav-list">
+        <li><a href="main page.html"><span class="nav-icon">🏠</span><span>主页</span></a></li>
+        <li><a href="life-tips.html"><span class="nav-icon">💡</span><span>生活小贴士</span></a></li>
+        <li><a href="study-guide.html"><span class="nav-icon">📚</span><span>学习指导</span></a></li>
+        <li><a href="enrollment-steps.html"><span class="nav-icon">📝</span><span>入学步骤</span></a></li>
+        <li><a href="share.html"><span class="nav-icon">🔗</span><span>分享</span></a></li>
+        <li><a href="fun.html"><span class="nav-icon">🎉</span><span>娱乐</span></a></li>
+        <li><a href="hospital.html"><span class="nav-icon">🏥</span><span>医院</span></a></li>
+      </ul>
+    </div>
+
+    <!-- 右侧发布容器 -->
+    <div class="panel">
+      <h2>发布内容</h2>
+
+      <div class="control">
+        <label for="title">标题（可选）</label>
+        <input id="title" type="text" placeholder="给你的内容起个标题吧…">
+      </div>
+
+      <div class="control">
+        <label for="category">发布类型</label>
+        <select id="category">
+          <option value="life">生活小贴士</option>
+          <option value="study">学习指导</option>
+          <option value="enroll">入学步骤</option>
+          <option value="share">分享</option>
+          <option value="fun">娱乐</option>
+        </select>
+        <div class="hint">选择后，发布成功将自动跳转到对应栏目页面</div>
+      </div>
+
+      <div class="control">
+        <label for="desc">正文</label>
+        <textarea id="desc" placeholder="写点什么…"></textarea>
+      </div>
+
+      <div class="control">
+        <label>图片</label>
+        <div class="file">
+          <label for="images">选择图片</label>
+          <input id="images" type="file" accept="image/*" multiple />
+          <span class="hint">支持多张，建议 &lt; 5MB / 张</span>
+        </div>
+        <div class="preview" id="preview"></div>
+      </div>
+
+      <!-- 按钮行（取消在左，发布在右） -->
+      <div class="row">
+        <button class="btn cancel" type="button" id="cancelBtn">取消</button>
+        <button class="btn primary" type="button" id="publishBtn">发布</button>
+      </div>
+
+      <div class="msg" id="msg"></div>
+    </div>
+  </div>
+
+  <script>
+  const API_BASE = 'http://127.0.0.1:3001';
+  const FALLBACK =
+    'data:image/svg+xml;utf8,'+encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128"><rect width="100%" height="100%" fill="#e5e7eb"/><circle cx="64" cy="54" r="26" fill="#cbd5e1"/><rect x="24" y="86" width="80" height="28" rx="14" fill="#cbd5e1"/></svg>'
+    );
+
+  function getLocalUser() {
+    const keys = ['currentUser','user','USER','auth_user'];
+    for (const k of keys) {
+      const v = localStorage.getItem(k);
+      if (!v) continue;
+      try { return JSON.parse(v); } catch {}
+    }
+    return null;
+  }
+
+  function renderUser(u) {
+    const nameEl   = document.querySelector('.username');
+    const avatarEl = document.querySelector('.avatar');
+    if (!nameEl || !avatarEl) return;
+
+    const name = u?.nickname || u?.username || u?.displayName || u?.name || u?.email || '我的账号';
+    let avatar = u?.avatarPath || u?.avatarUrl || u?.avatar || '';
+
+    // 把相对路径头像补成完整 URL
+    if (avatar && !/^https?:\/\//i.test(avatar)) {
+      avatar = API_BASE + (avatar.startsWith('/') ? avatar : '/' + avatar);
+    }
+
+    nameEl.textContent = name;
+    avatarEl.alt = name;
+    avatarEl.onerror = () => { avatarEl.src = FALLBACK; };
+    avatarEl.src = avatar || FALLBACK;
+  }
+
+  async function ensureUser() {
+    let u = getLocalUser();
+    if (!u) {
+      try {
+        const res = await fetch(API_BASE + '/api/users/me', { credentials: 'include' });
+        if (res.ok) {
+          u = await res.json();
+          // 统一写入一个键，后续页面也能读到
+          localStorage.setItem('currentUser', JSON.stringify(u));
+        }
+      } catch {}
+    }
+    renderUser(u);
+  }
+
+  // —— 作者徽章工具 ——
+  function currentUserName(u){
+    return u?.nickname || u?.username || u?.displayName || u?.name || u?.email || '我的账号';
+  }
+  function currentUserAvatar(u){
+    let avatar = u?.avatarPath || u?.avatarUrl || u?.avatar || '';
+    if (avatar && !/^https?:\/\//i.test(avatar)) {
+      avatar = API_BASE + (avatar.startsWith('/') ? avatar : '/' + avatar);
+    }
+    return avatar || FALLBACK;
+  }
+  function createAuthorBadge(u){
+    const badge = document.createElement('div');
+    badge.className = 'author-badge';
+    const img = document.createElement('img');
+    img.className = 'author-ava';
+    img.src = currentUserAvatar(u);
+    img.onerror = () => { img.src = FALLBACK; };
+    const text = document.createElement('span');
+    text.className = 'author-name';
+    text.textContent = currentUserName(u);
+    badge.appendChild(img);
+    badge.appendChild(text);
+    return badge;
+  }
+
+  // 预览：选图后为每张缩略图右下角加徽章
+  function bindPreviewAuthorBadge(){
+    const fileInput = document.getElementById('images');
+    const preview = document.getElementById('preview');
+    if (!fileInput || !preview) return;
+
+    fileInput.addEventListener('change', () => {
+      const u = getLocalUser();
+      preview.innerHTML = '';
+      const files = Array.from(fileInput.files || []);
+      files.forEach(f => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          const wrap = document.createElement('div');
+          wrap.className = 'thumb';
+
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          img.alt = f.name;
+
+          wrap.appendChild(img);
+          wrap.appendChild(createAuthorBadge(u));
+          preview.appendChild(wrap);
+        };
+        reader.readAsDataURL(f);
+      });
+    });
+  }
+
+  // 取消：先确认再跳转
+  function bindCancel(){
+    const cancelBtn = document.getElementById('cancelBtn');
+    if (!cancelBtn) return;
+    cancelBtn.addEventListener('click', () => {
+      const ok = confirm('确定要取消并离开吗？未保存的内容将不会保留。');
+      if (ok) location.href = 'life-tips.html';
+    });
+  }
+
+  // 辅助：根据类别决定跳转页面
+  function pageOfCategory(cat){
+    switch(cat){
+      case 'life':   return 'life-tips.html';
+      case 'study':  return 'study-guide.html';
+      case 'enroll': return 'enrollment-steps.html';
+      case 'share':  return 'share.html';
+      case 'fun':    return 'fun.html';
+      default:       return 'life-tips.html';
+    }
+  }
+
+  // —— 真正的“发布”提交（替换掉旧的占位提示逻辑）——
+  function bindPublish(){
+    const btn   = document.getElementById('publishBtn');
+    const msgEl = document.getElementById('msg');
+    if (!btn) return;
+
+    btn.addEventListener('click', async () => {
+      msgEl.style.color = '#d33';
+      msgEl.textContent = '';
+
+      const title    = (document.getElementById('title')    || {}).value || '';
+      const desc     = (document.getElementById('desc')     || {}).value || '';
+      const category = (document.getElementById('category') || {}).value || 'life';
+      const files    = (document.getElementById('images')   || {}).files || [];
+
+      if(!desc.trim() && (!files || files.length === 0)){
+        msgEl.textContent = '请至少填写正文或选择一张图片再发布。';
+        return;
+      }
+
+      const u = getLocalUser();
+      const fd = new FormData();
+      fd.append('title', title);
+      fd.append('desc', desc);
+      fd.append('category', category);
+      // 附带作者信息（后端会优先使用已登录用户覆盖）
+      fd.append('authorName',  currentUserName(u));
+      fd.append('authorAvatar', currentUserAvatar(u));
+      for (const f of files) fd.append('images', f);
+
+      try{
+        const res = await fetch(API_BASE + '/api/posts', { method:'POST', body: fd, credentials:'include' });
+        if (res.status === 401) {
+          alert('未登录，请先登录再发布。');
+          location.href = 'login.html';
+          return;
+        }
+        const data = await res.json().catch(()=> ({}));
+        if (!res.ok) {
+          msgEl.textContent = data.msg || `发布失败（${res.status}）`;
+          return;
+        }
+        // 成功提示并跳转
+        msgEl.style.color = '#16a34a';
+        msgEl.textContent = '发布成功，正在跳转...';
+        location.href = pageOfCategory(category);
+      }catch(e){
+        msgEl.textContent = '发布失败：无法连接后端服务。';
+      }
+    });
+  }
+
+  // 初始化
+  document.addEventListener('DOMContentLoaded', () => {
+    ensureUser();
+    bindPreviewAuthorBadge();
+    bindPublish();       // <- 关键：启用真正的发布
+    bindCancel();
+  });
+</script>
+
+</body>
+</html>

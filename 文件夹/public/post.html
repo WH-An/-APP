@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>帖子详情</title>
+<style>
+:root{--bg:#0b0f14;--panel:#ffffff;--text:#0f172a;--muted:#64748b;--accent:#16a34a;--border:#e5e7eb;--shadow:0 10px 30px rgba(0,0,0,.18);--radius:18px;}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;font-family:'Microsoft YaHei',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,'PingFang SC',sans-serif;
+  background:radial-gradient(1200px 600px at 10% -10%,#1f8db8 18%, transparent 60%),
+             radial-gradient(900px 500px at 110% 110%,#2bb8d6 12%, transparent 60%),var(--bg);
+  color:#fff;overflow:auto;
+}
+.page{max-width:1100px;margin:28px auto;padding:0 20px}
+.card{
+  background:var(--panel);color:var(--text);border:1px solid var(--border);
+  border-radius:20px;box-shadow:var(--shadow);padding:16px;
+}
+.header{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.header .avatar{width:44px;height:44px;border-radius:50%;object-fit:cover;border:1px solid #eef2ff}
+.header .name{font-weight:800}
+.header .meta{color:#64748b;font-size:13px}
+.follow{margin-left:auto;border:1px solid var(--border);background:#fff;border-radius:999px;padding:6px 12px;cursor:pointer;font-weight:700;}
+.grid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}
+@media (max-width: 920px){.grid{grid-template-columns:1fr}}
+/* 图片轮播 */
+.gallery{position:relative;border:1px solid var(--border);border-radius:16px;overflow:hidden;background:#000;}
+.slide{width:100%;height:100%;display:none;align-items:center;justify-content:center;background:#000;}
+.slide.active{display:flex}
+.slide img{width:100%;height:auto;display:block;object-fit:contain;aspect-ratio: 4 / 3;}
+.gnav{position:absolute;top:50%;left:10px;right:10px;display:flex;justify-content:space-between;transform:translateY(-50%);pointer-events:none;}
+.gbtn{pointer-events:auto;width:38px;height:38px;border-radius:50%;border:1px solid rgba(255,255,255,.6);background:rgba(0,0,0,.28);color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.counter{position:absolute;right:12px;top:12px;background:rgba(0,0,0,.55);color:#fff;padding:4px 10px;border-radius:999px;font-size:12px}
+.dots{display:flex;gap:6px;justify-content:center;padding:10px}
+.dot{width:6px;height:6px;border-radius:50%;background:#d1d5db;opacity:.7}
+.dot.on{opacity:1;background:#111827}
+.content{border:1px solid var(--border);border-radius:16px;padding:14px;background:#fff}
+.title{font-size:20px;font-weight:900;margin:0 0 8px}
+.desc{white-space:pre-wrap;line-height:1.8}
+.attach{margin-top:12px;border-top:1px dashed #e5e7eb;padding-top:12px;color:#374151;font-size:14px}
+.attach a{color:#2563eb;text-decoration:none;word-break:break-all}
+.actions{display:flex;gap:14px;align-items:center;margin-top:14px;color:#6b7280}
+.actions button{
+  border:1px solid var(--border);
+  background:#fff;
+  border-radius:12px;
+  padding:8px 14px;
+  cursor:pointer;
+  font-weight:700;
+  transition:.2s transform,.2s box-shadow,.2s background;
+}
+.actions button:hover{transform:translateY(-2px);box-shadow:0 4px 10px rgba(0,0,0,.15);}
+.actions button:active{transform:translateY(0);}
+#likeBtn.liked{
+  background:linear-gradient(135deg,#ef4444,#f87171);
+  color:#fff;border:none;
+}
+#favBtn.faved{
+  background:linear-gradient(135deg,#facc15,#fbbf24);
+  color:#111;border:none;
+}
+.back{display:inline-flex;align-items:center;gap:8px;margin-bottom:12px;border:1px solid rgba(255,255,255,.35);color:#fff;padding:6px 10px;border-radius:12px;text-decoration:none}
+
+/* === 评论样式（列表内部滚动 + 底部按钮固定） === */
+.comments{margin-top:16px;border:1px solid var(--border);border-radius:16px;background:#fff;padding:14px}
+.comments h2{margin:0 0 10px 0;font-size:18px;font-weight:900}
+.cmt-form{display:flex;gap:10px;align-items:flex-start}
+.cmt-input{
+  flex:1;min-height:84px;padding:10px 12px;border:1px solid #e5e7eb;border-radius:12px;resize:vertical;
+  font-family:inherit;font-size:14px;background:#fff;
+}
+.cmt-submit{
+  white-space:nowrap;border:1px solid var(--border);background:#0f172a;color:#fff;border-radius:12px;padding:10px 14px;cursor:pointer;font-weight:800
+}
+.cmt-submit:disabled{opacity:.6;cursor:not-allowed}
+.cmt-warn{color:#dc2626;font-size:13px;margin:6px 0 0}
+
+/* 面板容器：固定高度，内部滚动 */
+.cmt-panel{
+  margin-top:14px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  max-height:360px; /* 你可以改成 300/400 等 */
+}
+@media (max-width: 520px){
+  .cmt-panel{ max-height:300px; }
+}
+
+/* 列表变为可滚动区域 */
+.cmt-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  overflow-y:auto;
+  padding-right:6px; /* 给滚动条留空间 */
+  min-height:80px;   /* 避免没内容时过窄 */
+  border:1px dashed #e5e7eb;
+  border-radius:12px;
+  background:#fafafa;
+}
+.cmt-list::-webkit-scrollbar{width:6px}
+.cmt-list::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:6px}
+
+/* 单条评论卡片 */
+.cmt-item{display:grid;grid-template-columns:44px 1fr;gap:10px;border:1px solid #eef2ff;border-radius:12px;padding:10px;background:#fff}
+.cmt-item .ava{width:44px;height:44px;border-radius:50%;object-fit:cover;border:1px solid #e5e7eb}
+.cmt-head{display:flex;gap:8px;align-items:center}
+.cmt-name{font-weight:800}
+.cmt-time{color:#6b7280;font-size:12px}
+.cmt-text{white-space:pre-wrap;line-height:1.7;margin-top:6px}
+.cmt-actions{margin-left:auto;display:flex;gap:8px}
+.cmt-actions button{border:1px solid #e5e7eb;background:#fff;border-radius:10px;padding:4px 8px;cursor:pointer}
+
+/* 空状态与“加载更多” */
+.cmt-empty{color:#6b7280;background:#f8fafc;border:1px dashed #e5e7eb;border-radius:12px;padding:12px;text-align:center}
+.cmt-more{display:flex;justify-content:center}
+.cmt-more button{border:1px solid var(--border);background:#fff;border-radius:12px;padding:8px 14px;cursor:pointer}
+</style>
+</head>
+<body>
+  <div class="page">
+    <a class="back" href="javascript:history.back()">← 返回</a>
+
+    <div class="card">
+      <div class="header">
+        <img class="avatar" id="authorAvatar" alt="">
+        <div>
+          <div class="name" id="authorName">作者</div>
+          <div class="meta" id="meta">—</div>
+        </div>
+        <button class="follow" id="followBtn">关注</button>
+      </div>
+
+      <div class="grid">
+        <!-- 左侧：图片轮播（无图会自动隐藏） -->
+        <div id="leftBox">
+          <div class="gallery" id="gallery"></div>
+          <div class="dots" id="dots"></div>
+        </div>
+
+        <!-- 右侧：正文 -->
+        <div class="content">
+          <h1 class="title" id="title">标题</h1>
+          <div class="desc" id="desc"></div>
+
+          <div class="attach" id="attach" style="display:none">
+            <div style="font-weight:700;margin-bottom:6px">附件</div>
+            <div id="attachList"></div>
+          </div>
+
+          <div class="actions">
+            <button id="likeBtn">❤️ 赞 <span id="likeCount">0</span></button>
+            <button id="favBtn">⭐ 收藏</button>
+            <button id="cmtBtn">💬 评论 <span id="cmtCount">0</span></button>
+            <button id="copyBtn">🔗 复制链接</button>
+          </div>
+
+          <!-- 评论区 -->
+          <section id="comments" class="comments">
+            <h2>评论</h2>
+            <div class="cmt-form">
+              <textarea id="cmtInput" class="cmt-input" placeholder="写点什么吧…（支持换行）"></textarea>
+              <button id="cmtSubmit" class="cmt-submit">发布</button>
+            </div>
+            <div id="cmtWarn" class="cmt-warn" style="display:none"></div>
+
+            <!-- 空状态（无评论时显示） -->
+            <div id="cmtEmpty" class="cmt-empty" style="display:none">还没有评论，来当第一个吧～</div>
+
+            <!-- 固定高度评论面板：上方滚动列表 + 底部按钮 -->
+            <div class="cmt-panel">
+              <div id="cmtList" class="cmt-list"></div>
+              <div class="cmt-more" id="cmtMore" style="display:none">
+                <button id="cmtMoreBtn">加载更多</button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+const API_BASE = 'http://127.0.0.1:3001';
+
+function q(k){return document.querySelector(k)}
+function toAbs(u){ if(!u) return ''; if(/^https?:\/\//i.test(u)) return u; return u.startsWith('/')?API_BASE+u:API_BASE+'/'+u; }
+function getParam(name){ return new URL(location.href).searchParams.get(name) || ''; }
+function fmtDate(iso){ try{const d=new Date(iso); if(isNaN(d)) return ''; return d.toLocaleString('zh-CN',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});}catch{return ''} }
+
+const FALLBACK_AVA = 'data:image/svg+xml;utf8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96"><rect width="100%" height="100%" fill="#e5e7eb"/><circle cx="48" cy="40" r="20" fill="#cbd5e1"/><rect x="18" y="66" width="60" height="18" rx="9" fill="#cbd5e1"/></svg>');
+// 通过作者邮箱取用户地区
+async function fetchUserAreaByEmail(email){
+  const key = (email || '').trim();
+  if(!key) return '';
+  try{
+    const r = await fetch(`${API_BASE}/api/users/by-email?email=${encodeURIComponent(key)}`, { credentials:'include' });
+    if(!r.ok) return '';
+    const data = await r.json();
+    return (data.area || '').trim();
+  }catch{
+    return '';
+  }
+}
+
+function pickAuthor(p){
+  const u=p.user||p.author||p.owner||{};
+  const name=(p.authorName||u.nickname||u.username||u.displayName||u.name||p.username||p.email||'匿名用户').trim();
+  let ava=(p.authorAvatar||u.avatarPath||u.avatarUrl||u.avatar||p.avatar||'').trim();
+  if(ava&&!/^https?:\/\//i.test(ava)) ava=toAbs(ava);
+  return {name, avatar:ava||FALLBACK_AVA, email:(p.authorEmail||u.email||'').trim()};
+}
+
+function collectImages(p){
+  const imgs = [];
+  (p.images||[]).forEach(s=>s && imgs.push(toAbs(s)));
+  (p.files||[]).forEach(f=>{
+    const url = (typeof f==='string')? f : (f.url||f.path||'');
+    if(!url) return;
+    if(/\.(png|jpe?g|webp|gif|bmp|svg)$/i.test(url)) imgs.push(toAbs(url));
+  });
+  return imgs;
+}
+
+async function fetchPostById(id){
+  try{
+    const r = await fetch(`${API_BASE}/api/posts/${encodeURIComponent(id)}`, { credentials:'include' });
+    if(r.ok) return r.json();
+  }catch{}
+  try{
+    const r = await fetch(`${API_BASE}/api/posts`, { credentials:'include' });
+    const arr = await r.json();
+    return (arr||[]).find(x => String(x._id||x.id||x.postId||'') === String(id)) || null;
+  }catch{}
+  return null;
+}
+
+/* -------- 评论：后端优先 / 本地兜底 -------- */
+function getCurrentUser(){
+  try{
+    return JSON.parse(localStorage.getItem('currentUser'))
+        || JSON.parse(localStorage.getItem('user'))
+        || JSON.parse(localStorage.getItem('USER'))
+        || JSON.parse(localStorage.getItem('auth_user')) || null;
+  }catch{ return null; }
+}
+function userKey(u){
+  return (u && (u.email||u.username||u.nickname||u.id))
+    ? String(u.email||u.username||u.nickname||u.id).toLowerCase()
+    : 'guest';
+}
+
+async function apiListComments(postId, {offset=0, limit=10}={}){
+  try{
+    const r = await fetch(`${API_BASE}/api/posts/${encodeURIComponent(postId)}/comments?offset=${offset}&limit=${limit}`, { credentials:'include' });
+    if(r.ok) return await r.json();
+  }catch{}
+  const raw = localStorage.getItem(`comments:${postId}`) || '[]';
+  const all = JSON.parse(raw);
+  const items = all.slice(offset, offset+limit);
+  return { items, total: all.length };
+}
+async function apiCreateComment(postId, content){
+  const me = getCurrentUser();
+  try{
+    const r = await fetch(`${API_BASE}/api/posts/${encodeURIComponent(postId)}/comments`, {
+      method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include',
+      body: JSON.stringify({ content })
+    });
+    if(r.ok) return await r.json();
+  }catch{}
+  const now = new Date().toISOString();
+  const fallback = {
+    id: 'local-'+Math.random().toString(36).slice(2),
+    postId, content, createdAt: now,
+    user: { name: (me && (me.nickname||me.username||me.displayName||me.name||me.email)) || '我', avatar: (me && (me.avatarPath||me.avatarUrl||me.avatar)) || '', email: me?.email }
+  };
+  const key = `comments:${postId}`;
+  const all = JSON.parse(localStorage.getItem(key) || '[]');
+  all.unshift(fallback);
+  localStorage.setItem(key, JSON.stringify(all));
+  return fallback;
+}
+async function apiDeleteComment(postId, commentId){
+  try{
+    const r = await fetch(`${API_BASE}/api/posts/${encodeURIComponent(postId)}/comments/${encodeURIComponent(commentId)}`, {
+      method:'DELETE', credentials:'include'
+    });
+    if(r.ok) return true;
+  }catch{}
+  const key = `comments:${postId}`;
+  const all = JSON.parse(localStorage.getItem(key) || '[]');
+  const next = all.filter(x => (x.id||x._id) !== commentId);
+  localStorage.setItem(key, JSON.stringify(next));
+  return true;
+}
+
+/* -------- 轮播/附件 -------- */
+function buildGallery(imgs){
+  const box = q('#gallery'); const dots = q('#dots');
+  box.innerHTML=''; dots.innerHTML='';
+  if(!imgs.length){
+    const empty = document.createElement('div');
+    empty.className='slide active';
+    empty.innerHTML = `<img src="${toAbs('/public/placeholder.jpg')}" alt="">`;
+    box.appendChild(empty);
+    return;
+  }
+  let idx=0;
+  imgs.forEach((src,i)=>{
+    const s=document.createElement('div');
+    s.className = 'slide'+(i===0?' active':'');
+    const img=new Image(); img.src=src; img.alt='';
+    img.onerror=()=>{ s.remove(); updateCounter(); };
+    s.appendChild(img); box.appendChild(s);
+
+    const d=document.createElement('div');
+    d.className='dot'+(i===0?' on':''); d.addEventListener('click',()=>go(i));
+    dots.appendChild(d);
+  });
+
+  const counter=document.createElement('div'); counter.className='counter'; box.appendChild(counter);
+  const nav=document.createElement('div'); nav.className='gnav';
+  nav.innerHTML=`<button class="gbtn" id="prev">‹</button><button class="gbtn" id="next">›</button>`; box.appendChild(nav);
+
+  function updateCounter(){
+    const slides=[...box.querySelectorAll('.slide')];
+    if(!slides.length){ counter.textContent='0/0'; return; }
+    const total=slides.length; idx = Math.max(0, Math.min(idx, total-1));
+    counter.textContent = (idx+1)+'/'+total;
+    slides.forEach((el,i)=> el.classList.toggle('active', i===idx));
+    [...dots.children].forEach((d,i)=> d.classList.toggle('on', i===idx));
+  }
+  function go(i){ idx=i; updateCounter(); }
+  function step(n){ idx += n; const total=box.querySelectorAll('.slide').length; idx=(idx+total)%total; updateCounter(); }
+
+  box.querySelector('#prev').addEventListener('click',()=>step(-1));
+  box.querySelector('#next').addEventListener('click',()=>step(+1));
+  document.addEventListener('keydown',e=>{ if(e.key==='ArrowLeft') step(-1); if(e.key==='ArrowRight') step(+1); });
+
+  updateCounter();
+}
+function fillAttach(p){
+  const cont=q('#attach'); const list=q('#attachList');
+  const files = (p.files||[]).map(f=>{
+    if(typeof f==='string') return {name:f.split('/').pop(), url:toAbs(f)};
+    return {name:f.name || (f.url||f.path||'').split('/').pop(), url:toAbs(f.url||f.path||'')};
+  }).filter(x=>x.url);
+  if(!files.length){ cont.style.display='none'; return; }
+  cont.style.display=''; list.innerHTML='';
+  files.forEach(f=>{
+    const a=document.createElement('a'); a.href=f.url; a.target='_blank'; a.rel='noopener';
+    a.textContent = '📎 '+(f.name||'文件'); const div=document.createElement('div'); div.appendChild(a);
+    list.appendChild(div);
+  });
+}
+
+/* -------- 评论渲染（作者可删全体，发布者可删自己） -------- */
+function renderCommentItem(c, meKey, authorKey, postId){
+  const id = c.id || c._id || '';
+  const u  = c.user || {};
+  const name = (u.name || u.nickname || u.username || u.displayName || '用户');
+  let ava = (u.avatar || u.avatarUrl || u.avatarPath || '');
+  if(ava && !/^https?:\/\//i.test(ava)) ava = toAbs(ava);
+  const time = fmtDate(c.createdAt || c.time || Date.now());
+
+  const canDelete = (userKey(u) === meKey) || (meKey === authorKey);
+
+  const el = document.createElement('div');
+  el.className='cmt-item';
+  el.innerHTML = `
+    <img class="ava" src="${ava||FALLBACK_AVA}" onerror="this.src='${FALLBACK_AVA}'" alt="">
+    <div>
+      <div class="cmt-head">
+        <span class="cmt-name">${name}</span>
+        <span class="cmt-time">${time}</span>
+        <div class="cmt-actions">
+          ${canDelete ? `<button data-del="${id}">删除</button>` : ``}
+        </div>
+      </div>
+      <div class="cmt-text"></div>
+    </div>
+  `;
+  el.querySelector('.cmt-text').textContent = c.content || '';
+  if(canDelete){
+    el.querySelector('[data-del]')?.addEventListener('click', async ()=>{
+      if(!confirm('确认删除这条评论？')) return;
+      const ok = await apiDeleteComment(postId, id);
+      if(ok){ el.remove(); bumpCount(-1); checkEmpty(); }
+    });
+  }
+  return el;
+}
+
+(function init(){
+  (async ()=>{
+    const id = getParam('id') || getParam('_id') || getParam('postId');
+    if(!id){ q('#title').textContent='未找到帖子'; q('#desc').textContent='缺少 id 参数。'; return; }
+
+    const post = await fetchPostById(id);
+    if(!post){ q('#title').textContent='未找到帖子'; q('#desc').textContent='这个帖子不存在或已被删除。'; return; }
+
+    // 作者与时间（含地区）
+const {name,avatar,email:authorEmail} = pickAuthor(post);
+q('#authorName').textContent = name;
+const avaEl = q('#authorAvatar'); avaEl.src = avatar; avaEl.onerror = ()=>{ avaEl.src = FALLBACK_AVA; };
+
+(async ()=>{
+  const parts = [];
+  if (post.category) parts.push('#' + post.category);
+
+  // 新增：作者地区
+  const area = await fetchUserAreaByEmail(authorEmail);
+  if (area) parts.push(area);          // 有就显示“地区”，没有就不占位
+
+  const when = fmtDate(post.createdAt || post.time || post.date);
+  if (when) parts.push(when);
+
+  q('#meta').textContent = parts.join(' · ');
+})();
+
+    // 标题/正文
+    q('#title').textContent = (post.title||'');
+    q('#desc').textContent  = (post.desc||post.content||post.text||'');
+
+    // 轮播与附件 —— 无图时隐藏左栏
+    const imgs = collectImages(post);
+    if (imgs.length > 0) {
+      buildGallery(imgs);
+    } else {
+      q('#leftBox').style.display = 'none';
+      q('.grid').style.gridTemplateColumns = '1fr';
+    }
+    fillAttach(post);
+
+    // 初始化计数
+    const likeCountEl = q('#likeCount');
+    const cmtCountEl  = q('#cmtCount');
+    likeCountEl.textContent = post.likes || post.like || 0;
+    cmtCountEl.textContent  = post.commentsCount || post.commentCount || 0;
+
+    // 复制链接
+    q('#copyBtn').addEventListener('click', async ()=>{
+      const url = location.href;
+      try{ await navigator.clipboard.writeText(url); alert('链接已复制'); }
+      catch{ prompt('复制下面的链接', url); }
+    });
+
+    // 当前用户与 key（用于点赞/收藏/评论权限）
+    const me = getCurrentUser();
+    const meKey = userKey(me);
+
+    // 帖子作者 key（用于“作者可删全体”）
+    const authorObj = post.user || post.author || post.owner || { email: post.authorEmail, username: post.authorName };
+    const authorKey = userKey(authorObj);
+
+    // 点赞（可取消）& 收藏（可切换）
+    const likeBtn = q('#likeBtn');
+    const likeKey = `liked:${meKey}:${id}`;
+    if(localStorage.getItem(likeKey)) likeBtn.classList.add('liked');
+    likeBtn.addEventListener('click', ()=>{
+      let count = +likeCountEl.textContent || 0;
+      if(likeBtn.classList.contains('liked')){
+        likeBtn.classList.remove('liked'); localStorage.removeItem(likeKey);
+        likeCountEl.textContent = Math.max(0, count-1);
+      }else{
+        likeBtn.classList.add('liked'); localStorage.setItem(likeKey,'1');
+        likeCountEl.textContent = count+1;
+      }
+    });
+    const favBtn = q('#favBtn');
+    const favKey = `faved:${meKey}:${id}`;
+    function setFavUI(on){ if(on){ favBtn.classList.add('faved'); favBtn.textContent='⭐ 已收藏'; } else { favBtn.classList.remove('faved'); favBtn.textContent='⭐ 收藏'; } }
+    setFavUI(!!localStorage.getItem(favKey));
+    favBtn.addEventListener('click', ()=>{
+      const on = favBtn.classList.contains('faved');
+      if(on){ localStorage.removeItem(favKey); setFavUI(false); }
+      else  { localStorage.setItem(favKey,'1'); setFavUI(true); }
+    });
+
+    /* -------- 评论逻辑（列表内部滚动） -------- */
+    const listEl = q('#cmtList');
+    const emptyEl= q('#cmtEmpty');
+    const moreWrap=q('#cmtMore');
+    const moreBtn = q('#cmtMoreBtn');
+    const inputEl = q('#cmtInput');
+    const submitEl= q('#cmtSubmit');
+    const warnEl  = q('#cmtWarn');
+
+    let offset = 0;
+    const LIMIT = 10;
+    let total = 0;
+
+    function checkEmpty(){
+      const hasAny = listEl.children.length > 0;
+      emptyEl.style.display = hasAny ? 'none':'block';
+      moreWrap.style.display = (offset < total) ? 'flex':'none';
+    }
+    function bumpCount(delta){
+      const cur = +cmtCountEl.textContent || 0;
+      cmtCountEl.textContent = Math.max(0, cur + delta);
+    }
+
+    async function loadMore(){
+      submitEl.disabled = true;
+      try{
+        const {items, total: _total} = await apiListComments(id, {offset, limit: LIMIT});
+        total = _total ?? total;
+        items.forEach(c => listEl.appendChild(renderCommentItem(c, meKey, authorKey, id)));
+        offset += items.length;
+      }catch(e){
+        console.warn('list comments failed', e);
+      }finally{
+        submitEl.disabled = false;
+        checkEmpty();
+      }
+    }
+
+    // 初次加载
+    await loadMore();
+
+    // 发布评论
+    submitEl.addEventListener('click', async ()=>{
+      warnEl.style.display='none';
+      const txt = (inputEl.value||'').trim();
+      if(!txt){ warnEl.textContent='请输入内容'; warnEl.style.display='block'; return; }
+      if(!me){ warnEl.textContent='请先登录再评论'; warnEl.style.display='block'; return; }
+
+      submitEl.disabled = true;
+      try{
+        // 乐观插入（置顶）
+        const draft = {
+          id: 'draft-'+Date.now(),
+          content: txt,
+          createdAt: new Date().toISOString(),
+          user: {
+            name: me?.nickname||me?.username||me?.displayName||me?.name||me?.email||'我',
+            avatar: me?.avatarPath||me?.avatarUrl||me?.avatar||'',
+            email: me?.email
+          }
+        };
+        const node = renderCommentItem(draft, meKey, authorKey, id);
+        listEl.insertBefore(node, listEl.firstChild);
+        listEl.scrollTop = 0; // 新评论出现后滚到顶部
+        bumpCount(+1);
+        emptyEl.style.display='none';
+        inputEl.value='';
+
+        // 真正提交
+        const saved = await apiCreateComment(id, txt);
+        if(saved && (saved.id || saved._id)){
+          node.replaceWith(renderCommentItem(saved, meKey, authorKey, id));
+        }
+      }catch(e){
+        warnEl.textContent='发布失败，请稍后重试'; warnEl.style.display='block';
+      }finally{
+        submitEl.disabled = false;
+      }
+    });
+
+    // 加载更多（出现在滚动区下方的固定位置）
+    moreBtn.addEventListener('click', loadMore);
+
+    // 顶部“评论”按钮：滚动到评论区
+    q('#cmtBtn').addEventListener('click', ()=> q('#comments').scrollIntoView({behavior:'smooth', block:'start'}));
+  })();
+})();
+</script>
+</body>
+</html>
