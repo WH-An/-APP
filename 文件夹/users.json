@@ -1,0 +1,56 @@
+[
+  {
+    "id": 1755350721467,
+    "nickname": "An",
+    "email": "an69760925@gmail.com",
+    "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+    "area": "马来西亚",
+    "degree": "本科",
+    "avatarPath": "/uploads/1755350721460_an69760925@gmail.com.JPG"
+  },
+  {
+    "id": 1755350812953,
+    "nickname": "An",
+    "email": "anjunli@gmail.com",
+    "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+    "area": "马来西亚",
+    "degree": "本科",
+    "avatarPath": "/uploads/1755350812949_anjunli@gmail.com.JPG"
+  },
+  {
+    "id": 1755358847321,
+    "nickname": "Li",
+    "email": "a@123.com",
+    "password": "123",
+    "area": "马来西亚",
+    "degree": "硕士",
+    "avatarPath": "/uploads/1755432571769-31f051b9aa9408.jpg"
+  },
+  {
+    "id": 1755359039365,
+    "nickname": "oo",
+    "email": "l@123.com",
+    "password": "123",
+    "area": "香港",
+    "degree": "本科",
+    "avatarPath": "/uploads/1755416553774-76802b02dee398.JPG"
+  },
+  {
+    "id": 1755359098076,
+    "nickname": "kk",
+    "email": "kk@123.com",
+    "password": "123",
+    "area": "新加坡",
+    "degree": "本科",
+    "avatarPath": ""
+  },
+  {
+    "id": 1755420535843,
+    "nickname": "nm",
+    "email": "an@zuiniu.com",
+    "password": "123",
+    "area": "新加坡",
+    "degree": "本科",
+    "avatarPath": "/uploads/1755420553467-fe85366671639.jpg"
+  }
+]
