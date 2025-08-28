@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>后台管理 · 发布内容</title>
+  
+  <style>
+    :root{--bg:#0b0f14;--panel:#ffffff;--text:#0f172a;--muted:#64748b;--accent:#16a34a;--danger:#ef4444;--border:#e5e7eb;--shadow:0 10px 30px rgba(0,0,0,.18);--radius:18px}
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:'Microsoft YaHei',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,'PingFang SC',sans-serif;background:radial-gradient(1200px 600px at 10% -10%,#1f8db8 18%, transparent 60%),radial-gradient(900px 500px at 110% 110%,#2bb8d6 12%, transparent 60%),var(--bg);color:#fff}
+    .layout{display:grid;grid-template-columns:220px 1fr;gap:18px;height:100vh;padding:24px;overflow:hidden}
+    .sidebar{background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px 16px;display:flex;flex-direction:column;gap:16px}
+    .account-info{display:flex;flex-direction:column;align-items:center;gap:10px;text-decoration:none;color:inherit;border:1px dashed #eef2ff;border-radius:14px;padding:14px;background:#fff}
+    .avatar{width:56px;height:56px;border-radius:50%;object-fit:cover}
+    .username{font-weight:700}
+    .nav-list{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:10px}
+    .nav-list a{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text);border:1px solid var(--border);background:#fafafa;border-radius:12px;padding:10px 14px;transition:.2s}
+    .nav-list a:hover{background:#f3f4f6;transform:translateY(-1px)}
+    .nav-icon{width:22px;display:inline-flex;justify-content:center}
+    .main{background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;display:flex;flex-direction:column;gap:14px;height:100%;overflow:hidden}
+    h1{font-size:18px;margin:0}
+    .bar{display:flex;gap:10px;align-items:center}
+    .bar .spacer{flex:1}
+    .btn{display:inline-flex;align-items:center;gap:8px;cursor:pointer;border:1px solid var(--border);background:#fff;color:#111827;border-radius:12px;padding:8px 12px;font-weight:700;transition:.15s}
+    .btn:hover{background:#f3f4f6}
+    .btn-danger{border-color:#fecaca;color:#991b1b}
+    .btn-danger:hover{background:#fee2e2}
+    .grid{display:grid;grid-template-columns:1fr;gap:14px;min-height:0}
+    .card{border:1px solid var(--border);border-radius:14px;box-shadow:0 6px 18px rgba(0,0,0,.06);background:#fff;overflow:hidden;display:flex;flex-direction:column}
+    .card h2{font-size:16px;margin:0;padding:12px 14px;border-bottom:1px solid var(--border)}
+    .card .body{padding:12px 14px;overflow:auto}
+    .field{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+    .field label{font-size:12px;color:#334155}
+    .field input,.field textarea,.field select{border:1px solid var(--border);border-radius:12px;padding:10px 12px;font-size:14px;outline:none}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    table{width:100%;border-collapse:collapse}
+    th,td{font-size:13px;text-align:left;border-bottom:1px solid var(--border);padding:8px}
+    tbody tr:hover{background:#fafafa}
+    .pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;border:1px solid var(--border);border-radius:999px;padding:4px 8px;background:#fff}
+    .pill.pin{border-color:#bbf7d0;background:#f0fdf4;color:#166534}
+    .muted{color:#64748b}
+    .right{justify-content:flex-end}
+    .danger{color:#b91c1c}
+    .tip{font-size:12px;color:#64748b}
+    .image-preview{position:relative;width:80px;height:80px;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:#f9fafb}
+    .image-preview img{width:100%;height:100%;object-fit:cover}
+    .image-preview .remove{position:absolute;top:2px;right:2px;width:20px;height:20px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center}
+    .image-preview .remove:hover{background:rgba(0,0,0,.8)}
+    .drop-zone{transition:all .2s ease}
+    .drop-zone.dragover{border-color:#16a34a;background-color:#f0fdf4}
+    .toast{position:fixed;right:16px;bottom:16px;background:#0f172a;color:#fff;border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:10px 14px;box-shadow:0 10px 24px rgba(0,0,0,.3);opacity:0;transform:translateY(6px);transition:.2s;z-index:9999}
+    .toast.show{opacity:1;transform:translateY(0)}
+    .modal{position:fixed;inset:0;background:rgba(2,6,23,.5);display:none;align-items:center;justify-content:center;padding:16px;z-index:1000}
+    .modal .panel{width:min(720px,96vw);background:#fff;border-radius:16px;border:1px solid var(--border);box-shadow:var(--shadow);color:#111827;overflow:hidden}
+    .modal header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border)}
+    .modal header h3{margin:0;font-size:15px}
+    .modal .content{padding:12px 14px;max-height:70vh;overflow:auto}
+    .empty{padding:18px;text-align:center;color:#64748b}
+  </style>
+
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <a class="account-info" href="admin-profile.html">
+        <img src="" alt="头像" class="avatar">
+        <span class="username">我的账号</span>
+      </a>
+      <ul class="nav-list">
+        <li><a href="admin-all.html"><span class="nav-icon">⚙️</span><span>后台管理</span></a></li>
+        <li><a href="admin-publish.html"><span class="nav-icon">📝</span><span>发布内容</span></a></li>
+        <li><a href="admin-posts.html"><span class="nav-icon">📋</span><span>帖子管理</span></a></li>
+      </ul>
+    </aside>
+
+    <main class="main">
+      <div class="bar">
+        <!-- filled by page script if needed -->
+      </div>
+
+      
+  <div class="grid">
+    <section class="card" id="publish">
+      <h2>发布信息到当前分类</h2>
+      <div class="body">
+        <form id="publishForm">
+          <div class="row">
+            <div class="field" style="flex:1 1 260px">
+              <label>标题（可选）</label>
+              <input type="text" name="title" placeholder="例如：重要通知 / 攻略 / 设施更新…"/>
+            </div>
+            <div class="field" style="flex:1 1 260px">
+              <label>作者邮箱（用于通知）</label>
+              <input type="email" name="authorEmail" placeholder="someone@example.com"/>
+            </div>
+          </div>
+          <div class="field">
+            <label>正文/描述</label>
+            <textarea name="desc" rows="4" placeholder="输入要发布的内容…" required></textarea>
+          </div>
+          <div class="field">
+            <label>图片上传（可选，支持多选和拖拽）</label>
+            <input type="file" id="imageUpload" multiple accept="image/*" style="display: none;"/>
+            <div class="row" style="gap: 8px; align-items: center;">
+              <button type="button" class="btn" onclick="document.getElementById('imageUpload').click()">
+                📁 选择图片
+              </button>
+              <span class="tip" id="imageCount">未选择图片</span>
+            </div>
+            <div id="imagePreview" class="row drop-zone" style="margin-top: 8px; gap: 8px; flex-wrap: wrap; min-height: 40px; border: 2px dashed #e5e7eb; border-radius: 8px; padding: 8px; align-items: center; justify-content: center;" 
+                 ondrop="handleDrop(event)" 
+                 ondragover="handleDragOver(event)" 
+                 ondragleave="handleDragLeave(event)">
+              <span class="tip" id="dropHint">拖拽图片到此处或点击上方按钮选择</span>
+            </div>
+          </div>
+          <div class="row right">
+            <label class="row" style="gap:6px"><input type="checkbox" name="pinned"/> 置顶</label>
+            <button class="btn" type="submit">发布到该分类</button>
+          </div>
+          <div class="tip">提交后将先上传图片到 <code>/api/upload</code>，然后调用 <code>POST /api/posts</code> 发布内容。分类由本页顶部下拉框选择。</div>
+        </form>
+      </div>
+    </section>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const CATEGORY_ALIAS = { 'life-tips':'life', 'study-guide':'study', 'enrollment-steps':'enroll' };
+    function backendCat(cat){ return (CATEGORY_ALIAS[cat]||cat||'hospital').toLowerCase(); }
+    let currentCategory = 'hospital';
+
+    // 顶部分类条
+    function renderBar(){
+      const bar = document.querySelector('.bar');
+      if(!bar) return;
+      bar.innerHTML = `
+        <h1>后台管理 · 发布内容</h1>
+        <div class="spacer"></div>
+        <label class="row" style="gap:8px">
+          <span class="muted" style="font-size:12px">选择分类：</span>
+          <select id="categorySelect" class="btn">
+            <option value="hospital">医院（hospital）</option>
+            <option value="share">分享（share）</option>
+            <option value="life-tips">生活小贴士（life-tips）</option>
+            <option value="study-guide">学习指导（study-guide）</option>
+            <option value="enrollment-steps">入学步骤（enrollment-steps）</option>
+            <option value="fun">娱乐（fun）</option>
+          </select>
+        </label>
+      `;
+      const sel = document.getElementById('categorySelect');
+      const saved = localStorage.getItem('admin.category');
+      if(saved) { currentCategory = saved; sel.value = saved; }
+      sel.addEventListener('change', e=>{
+        currentCategory = e.target.value;
+        localStorage.setItem('admin.category', currentCategory);
+      });
+    }
+
+    let selectedImages = [];
+
+    // 图片上传和预览功能
+    function handleImageUpload(files) {
+      const preview = document.getElementById('imagePreview');
+      const count = document.getElementById('imageCount');
+      const dropHint = document.getElementById('dropHint');
+      
+      // 清空现有预览
+      preview.innerHTML = '';
+      selectedImages = [];
+      
+      if (files.length === 0) {
+        count.textContent = '未选择图片';
+        dropHint.style.display = 'block';
+        return;
+      }
+      
+      // 验证文件类型和大小
+      const validFiles = Array.from(files).filter(file => {
+        if (!file.type.startsWith('image/')) {
+          toast(`文件 ${file.name} 不是图片格式`);
+          return false;
+        }
+        if (file.size > 5 * 1024 * 1024) { // 5MB限制
+          toast(`文件 ${file.name} 太大，请选择小于5MB的图片`);
+          return false;
+        }
+        return true;
+      });
+      
+      if (validFiles.length === 0) {
+        count.textContent = '未选择有效图片';
+        return;
+      }
+      
+      count.textContent = `已选择 ${validFiles.length} 张图片`;
+      
+      validFiles.forEach((file, index) => {
+        // 创建预览元素
+        const previewItem = document.createElement('div');
+        previewItem.className = 'image-preview';
+        
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+        img.alt = `预览图片 ${index + 1}`;
+        
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'remove';
+        removeBtn.textContent = '×';
+        removeBtn.title = '移除图片';
+        removeBtn.onclick = () => {
+          previewItem.remove();
+          selectedImages = selectedImages.filter((_, i) => i !== index);
+          updateImageCount();
+        };
+        
+        previewItem.appendChild(img);
+        previewItem.appendChild(removeBtn);
+        preview.appendChild(previewItem);
+        
+        // 存储文件
+        selectedImages.push(file);
+      });
+    }
+    
+    function updateImageCount() {
+      const count = document.getElementById('imageCount');
+      const preview = document.getElementById('imagePreview');
+      const dropHint = document.getElementById('dropHint');
+      const imageCount = preview.children.length;
+      
+      if (imageCount === 0) {
+        count.textContent = '未选择图片';
+        dropHint.style.display = 'block';
+      } else {
+        count.textContent = `已选择 ${imageCount} 张图片`;
+        dropHint.style.display = 'none';
+      }
+    }
+    
+    // 拖拽功能
+    function handleDragOver(e) {
+      e.preventDefault();
+      e.currentTarget.classList.add('dragover');
+    }
+    
+    function handleDragLeave(e) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('dragover');
+    }
+    
+    function handleDrop(e) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('dragover');
+      
+      const files = Array.from(e.dataTransfer.files);
+      if (files.length > 0) {
+        handleImageUpload(files);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', ()=>{
+      renderBar();
+
+      // 图片上传事件监听
+      document.getElementById('imageUpload').addEventListener('change', (e) => {
+        handleImageUpload(e.target.files);
+      });
+
+      document.getElementById('publishForm').addEventListener('submit', async (e)=>{
+        e.preventDefault();
+        
+        if(!e.target.desc.value.trim()){ 
+          toast('正文必填'); 
+          return; 
+        }
+        
+        try {
+          // 先上传图片
+          const uploadedImages = [];
+          if (selectedImages.length > 0) {
+            toast(`正在上传 ${selectedImages.length} 张图片...`);
+            
+            for (let i = 0; i < selectedImages.length; i++) {
+              const file = selectedImages[i];
+              try {
+                const formData = new FormData();
+                formData.append('file', file);
+                
+                const response = await fetch(API_BASE + '/api/upload', {
+                  method: 'POST',
+                  body: formData,
+                  credentials: 'include'
+                });
+                
+                if (response.ok) {
+                  const result = await response.json();
+                  const imageUrl = result.url || result.path || result.file || '';
+                  if (imageUrl) {
+                    uploadedImages.push(imageUrl);
+                    toast(`图片 ${i + 1}/${selectedImages.length} 上传成功`);
+                  }
+                } else {
+                  toast(`图片 ${file.name} 上传失败`);
+                }
+              } catch (uploadError) {
+                console.warn('图片上传失败:', uploadError);
+                toast(`图片 ${file.name} 上传失败，将跳过`);
+              }
+            }
+            
+            if (uploadedImages.length > 0) {
+              toast(`成功上传 ${uploadedImages.length} 张图片`);
+            }
+          }
+          
+          // 准备发布数据
+          const payload = {
+            title: (e.target.title.value || '').trim(),
+            desc: (e.target.desc.value || '').trim(),
+            category: backendCat(currentCategory),
+            images: uploadedImages,
+            pinned: e.target.pinned.checked,
+            authorEmail: (e.target.authorEmail.value || '').trim()
+          };
+          
+          // 发布帖子
+          await api('/api/posts', { method:'POST', body: JSON.stringify(payload) });
+          toast('发布成功');
+          
+          // 重置表单
+          e.target.reset();
+          selectedImages = [];
+          document.getElementById('imagePreview').innerHTML = '';
+          document.getElementById('imageCount').textContent = '未选择图片';
+          document.getElementById('dropHint').style.display = 'block';
+          
+        } catch(err) { 
+          toast('发布失败：' + err.message); 
+        }
+      });
+    });
+  </script>
+
+    </main>
+  </div>
+
+  
+  <script>
+    const API_BASE = 'http://127.0.0.1:3001';
+    const $ = sel => document.querySelector(sel);
+    function toast(msg, ms=2000){ const el=$('#toast'); if(!el) return; el.textContent=msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'), ms); }
+    async function api(path, opt={}){
+      const url = path.startsWith('http')? path : API_BASE + path;
+      const res = await fetch(url, { credentials:'include', headers:{'Content-Type':'application/json', ...(opt.headers||{})}, ...opt });
+      if(!res.ok){ let text=''; try{text=await res.text()}catch{} throw new Error(res.status+': '+text); }
+      const ct = res.headers.get('content-type')||'';
+      return ct.includes('application/json')? res.json(): res.text();
+    }
+    async function hydrateAccount(){
+      // 管理员页面从localStorage获取管理员信息
+      const adminUser = JSON.parse(localStorage.getItem('adminUser') || localStorage.getItem('tempAdminUser') || '{}');
+      const name = adminUser.name || adminUser.nickname || '海外留学';
+      const avatar = adminUser.avatarPath || adminUser.avatar || '';
+      const n = document.querySelector('.username'); if(n) n.textContent = name;
+      const img = document.querySelector('.avatar'); if(img) img.src = avatar || '';
+    }
+    document.addEventListener('DOMContentLoaded', hydrateAccount);
+  </script>
+
+</body>
+</html>

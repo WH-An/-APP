@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>后台管理 · 帖子管理</title>
+  
+  <style>
+    :root{--bg:#0b0f14;--panel:#ffffff;--text:#0f172a;--muted:#64748b;--accent:#16a34a;--danger:#ef4444;--border:#e5e7eb;--shadow:0 10px 30px rgba(0,0,0,.18);--radius:18px}
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:'Microsoft YaHei',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,'PingFang SC',sans-serif;background:radial-gradient(1200px 600px at 10% -10%,#1f8db8 18%, transparent 60%),radial-gradient(900px 500px at 110% 110%,#2bb8d6 12%, transparent 60%),var(--bg);color:#fff}
+    .layout{display:grid;grid-template-columns:220px 1fr;gap:18px;height:100vh;padding:24px;overflow:hidden}
+    .sidebar{background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px 16px;display:flex;flex-direction:column;gap:16px}
+    .account-info{display:flex;flex-direction:column;align-items:center;gap:10px;text-decoration:none;color:inherit;border:1px dashed #eef2ff;border-radius:14px;padding:14px;background:#fff}
+    .avatar{width:56px;height:56px;border-radius:50%;object-fit:cover}
+    .username{font-weight:700}
+    .nav-list{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:10px}
+    .nav-list a{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text);border:1px solid var(--border);background:#fafafa;border-radius:12px;padding:10px 14px;transition:.2s}
+    .nav-list a:hover{background:#f3f4f6;transform:translateY(-1px)}
+    .nav-icon{width:22px;display:inline-flex;justify-content:center}
+    .main{background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;display:flex;flex-direction:column;gap:14px;height:100%;overflow:hidden}
+    h1{font-size:18px;margin:0}
+    .bar{display:flex;gap:10px;align-items:center}
+    .bar .spacer{flex:1}
+    .btn{display:inline-flex;align-items:center;gap:8px;cursor:pointer;border:1px solid var(--border);background:#fff;color:#111827;border-radius:12px;padding:8px 12px;font-weight:700;transition:.15s}
+    .btn:hover{background:#f3f4f6}
+    .btn-danger{border-color:#fecaca;color:#991b1b}
+    .btn-danger:hover{background:#fee2e2}
+    .grid{display:grid;grid-template-columns:1fr;gap:14px;min-height:0}
+    .card{border:1px solid var(--border);border-radius:14px;box-shadow:0 6px 18px rgba(0,0,0,.06);background:#fff;overflow:hidden;display:flex;flex-direction:column}
+    .card h2{font-size:16px;margin:0;padding:12px 14px;border-bottom:1px solid var(--border)}
+    .card .body{padding:12px 14px;overflow:auto}
+    .field{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+    .field label{font-size:12px;color:#334155}
+    .field input,.field textarea,.field select{border:1px solid var(--border);border-radius:12px;padding:10px 12px;font-size:14px;outline:none}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    table{width:100%;border-collapse:collapse}
+    th,td{font-size:13px;text-align:left;border-bottom:1px solid var(--border);padding:8px}
+    tbody tr:hover{background:#fafafa}
+    .pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;border:1px solid var(--border);border-radius:999px;padding:4px 8px;background:#fff}
+    .pill.pin{border-color:#bbf7d0;background:#f0fdf4;color:#166534}
+    .muted{color:#64748b}
+    .right{justify-content:flex-end}
+    .danger{color:#b91c1c}
+    .tip{font-size:12px;color:#64748b}
+    .toast{position:fixed;right:16px;bottom:16px;background:#0f172a;color:#fff;border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:10px 14px;box-shadow:0 10px 24px rgba(0,0,0,.3);opacity:0;transform:translateY(6px);transition:.2s;z-index:9999}
+    .toast.show{opacity:1;transform:translateY(0)}
+    .modal{position:fixed;inset:0;background:rgba(2,6,23,.5);display:none;align-items:center;justify-content:center;padding:16px;z-index:1000}
+    .modal .panel{width:min(720px,96vw);background:#fff;border-radius:16px;border:1px solid var(--border);box-shadow:var(--shadow);color:#111827;overflow:hidden}
+    .modal header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border)}
+    .modal header h3{margin:0;font-size:15px}
+    .modal .content{padding:12px 14px;max-height:70vh;overflow:auto}
+    .empty{padding:18px;text-align:center;color:#64748b}
+  </style>
+
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <a class="account-info" href="admin-profile.html">
+        <img src="" alt="头像" class="avatar">
+        <span class="username">我的账号</span>
+      </a>
+      <ul class="nav-list">
+        <li><a href="admin-all.html"><span class="nav-icon">⚙️</span><span>后台管理</span></a></li>
+        <li><a href="admin-publish.html"><span class="nav-icon">📝</span><span>发布内容</span></a></li>
+        <li><a href="admin-posts.html"><span class="nav-icon">📋</span><span>帖子管理</span></a></li>
+      </ul>
+    </aside>
+
+    <main class="main">
+      <div class="bar">
+        <!-- filled by page script if needed -->
+      </div>
+
+      
+  <div class="grid">
+    <section class="card" id="manage">
+      <h2>帖子管理（按当前分类）</h2>
+      <div class="body">
+        <div class="row" style="margin-bottom:8px">
+          <input id="q" placeholder="搜索标题/正文/作者…" style="flex:1;border:1px solid var(--border);border-radius:12px;padding:10px 12px"/>
+          <select id="pinFilter" class="btn" style="height:38px">
+            <option value="">全部</option>
+            <option value="1">只看置顶</option>
+            <option value="0">只看未置顶</option>
+          </select>
+        </div>
+        <div style="overflow:auto;max-height:60vh">
+          <table id="postTable">
+            <thead>
+              <tr>
+                <th>标题/正文</th>
+                <th>作者</th>
+                <th>分类</th>
+                <th>创建时间</th>
+                <th>状态</th>
+                <th style="width:280px">操作</th>
+              </tr>
+            </thead>
+            <tbody id="postTbody">
+              <tr><td colspan="6" class="empty">加载中…</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tip">置顶优先显示；置顶通过 <code>PATCH /api/posts/:id</code>（fallback: <code>POST/DELETE /api/posts/:id/pin</code>）。</div>
+      </div>
+    </section>
+  </div>
+
+  <div class="modal" id="cmtModal" aria-hidden="true">
+    <div class="panel">
+      <header>
+        <h3>评论管理</h3>
+        <button class="btn" onclick="closeCmtModal()">关闭</button>
+      </header>
+      <div class="content">
+        <div id="cmtList">加载中…</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const CATEGORY_ALIAS = { 'life-tips':'life', 'study-guide':'study', 'enrollment-steps':'enroll' };
+    function backendCat(cat){ return (CATEGORY_ALIAS[cat]||cat||'hospital').toLowerCase(); }
+
+    function fmtTime(t){ try{const d=new Date(t); return d.toLocaleString();}catch{ return String(t||''); } }
+    function match(q, p){
+      q=q.toLowerCase();
+      return [p.title,p.desc,p.authorName,(p.user||{}).name,(p.user||{}).email,p.authorEmail]
+             .some(x=>String(x||'').toLowerCase().includes(q));
+    }
+
+    let currentCategory = 'hospital';
+    let allPosts = [];
+
+    function renderBar(){
+      const bar = document.querySelector('.bar');
+      if(!bar) return;
+      bar.innerHTML = `
+        <h1>后台管理 · 帖子管理</h1>
+        <div class="spacer"></div>
+        <label class="row" style="gap:8px">
+          <span class="muted" style="font-size:12px">选择分类：</span>
+          <select id="categorySelect" class="btn">
+            <option value="hospital">医院（hospital）</option>
+            <option value="share">分享（share）</option>
+            <option value="life-tips">生活小贴士（life-tips）</option>
+            <option value="study-guide">学习指导（study-guide）</option>
+            <option value="enrollment-steps">入学步骤（enrollment-steps）</option>
+            <option value="fun">娱乐（fun）</option>
+          </select>
+        </label>
+        <button class="btn" id="refreshBtn">刷新</button>
+      `;
+      const sel = document.getElementById('categorySelect');
+      const saved = localStorage.getItem('admin.category');
+      if(saved) { currentCategory = saved; sel.value = saved; }
+      sel.addEventListener('change', e=>{
+        currentCategory = e.target.value;
+        localStorage.setItem('admin.category', currentCategory);
+        loadPosts();
+      });
+      document.getElementById('refreshBtn').addEventListener('click', loadPosts);
+    }
+
+    async function loadPosts(){
+      try{
+        let posts = await api(`/api/posts?category=${encodeURIComponent(backendCat(currentCategory))}`);
+        posts = (posts||[]).filter(p => String(p.category||p.cat||p.type||'').toLowerCase() === backendCat(currentCategory));
+        allPosts = posts.sort((a,b)=>{
+          const ap = a.pinned?1:0, bp=b.pinned?1:0; if(ap!==bp) return bp-ap;
+          return (new Date(b.createdAt||b.time||0)) - (new Date(a.createdAt||a.time||0));
+        });
+        renderPosts();
+      }catch(e){
+        console.warn(e);
+        document.querySelector('#postTbody').innerHTML = `<tr><td colspan="6" class="empty">加载失败：${e.message}</td></tr>`;
+      }
+    }
+
+    function renderPosts(){
+      const q = (document.querySelector('#q').value||'').trim();
+      const pf = document.querySelector('#pinFilter').value;
+      let list = allPosts.slice();
+      if(q) list = list.filter(p=>match(q,p));
+      if(pf==='1') list = list.filter(p=>!!p.pinned); else if(pf==='0') list=list.filter(p=>!p.pinned);
+      if(!list.length){
+        document.querySelector('#postTbody').innerHTML = `<tr><td colspan="6" class="empty">暂无数据</td></tr>`; return;
+      }
+      document.querySelector('#postTbody').innerHTML = list.map(p=>{
+        const name = p.authorName || (p.user&& (p.user.nickname||p.user.username||p.user.displayName||p.user.name)) || '匿名';
+        const email = p.authorEmail || (p.user&&p.user.email) || '';
+        const created = fmtTime(p.createdAt || p.time || p._createdAt);
+        const pin = p.pinned? '<span class="pill pin">已置顶</span>' : '<span class="pill">未置顶</span>';
+        const pid = p._id||p.id;
+        const cat = p.category || currentCategory;
+        return `<tr>
+          <td><div style="max-width:420px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${(p.title||p.desc||'').replace(/"/g,'&quot;')}"><strong>${p.title||'(无标题)'}</strong><div class="muted" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.desc||''}</div></div></td>
+          <td><div>${name}</div><div class="muted" style="font-size:12px">${email||''}</div></td>
+          <td>${cat}</td>
+          <td>${created}</td>
+          <td>${pin}</td>
+          <td>
+            <div class="row">
+              <button class="btn" onclick='togglePin(${JSON.stringify(pid)})'>${p.pinned? "取消置顶":"置顶"}</button>
+              <button class="btn" onclick='openComments(${JSON.stringify(pid)})'>评论</button>
+              <button class="btn btn-danger" onclick='deletePost(${JSON.stringify(pid)}, ${JSON.stringify(email)})'>删除</button>
+            </div>
+          </td>
+        </tr>`
+      }).join('');
+    }
+  </script>
+
+  <script>
+    // 置顶/取消置顶
+    async function togglePin(id){
+      try{
+        // 找到当前帖子状态
+        const post = allPosts.find(p => String(p._id || p.id) === String(id));
+        if (!post) {
+          toast('找不到帖子');
+          return;
+        }
+        
+        // 切换置顶状态
+        const newPinned = !post.pinned;
+        await api(`/api/posts/${id}`, { 
+          method:'PATCH', 
+          body: JSON.stringify({ 
+            pinned: newPinned, 
+            pinnedAt: newPinned ? new Date().toISOString() : null 
+          }) 
+        });
+        toast(newPinned ? '已置顶' : '已取消置顶'); 
+        loadPosts();
+      }catch(e){ toast('操作失败：'+e.message); }
+    }
+
+    // 评论弹窗
+    function closeCmtModal(){ document.getElementById('cmtModal').style.display='none'; document.getElementById('cmtList').innerHTML=''; }
+    async function openComments(postId){
+      const modal = document.getElementById('cmtModal');
+      const list = document.getElementById('cmtList');
+      modal.style.display='flex';
+      list.textContent='加载中…';
+      try{
+        let cmts = [];
+        try{ cmts = await api(`/api/comments?postId=${encodeURIComponent(postId)}`); }
+        catch(e1){ cmts = await api(`/api/posts/${postId}/comments`); }
+        if(!Array.isArray(cmts) || cmts.length===0){ list.innerHTML = '<div class="empty">暂无评论</div>'; return; }
+        list.innerHTML = cmts.map(c=>{
+          const name = c.authorName || (c.user && (c.user.nickname||c.user.username||c.user.displayName||c.user.name)) || '匿名';
+          const email = c.authorEmail || (c.user && c.user.email) || '';
+          const t = new Date(c.createdAt || c.time).toLocaleString();
+          const text = (c.text||c.content||'').replace(/[<>]/g, s=>({'<':'&lt;','>':'&gt;'}[s]));
+          const cid = c._id||c.id;
+          return `<div style="border:1px solid var(--border);border-radius:12px;padding:10px;margin-bottom:8px">
+            <div style="display:flex;justify-content:space-between;gap:8px;align-items:center">
+              <div><strong>${name}</strong> <span class="muted" style="font-size:12px">${email||''}</span></div>
+              <div class="muted" style="font-size:12px">${t}</div>
+            </div>
+            <div style="margin:8px 0">${text}</div>
+            <div class="row right">
+              <button class="btn btn-danger" onclick='deleteComment(${JSON.stringify(cid)}, ${JSON.stringify(email)})'>删除评论</button>
+            </div>
+          </div>`
+        }).join('');
+      }catch(e){ list.innerHTML = `<div class="empty">加载失败：${e.message}</div>`; }
+    }
+
+    async function deleteComment(commentId, email){
+      const reason = prompt('确认删除该评论。请输入删除原因（将会发送给评论者）：','评论不符合社区规范');
+      if(reason===null) return;
+      try{
+        try{ await api(`/api/comments/${commentId}`, { method:'DELETE' }); }
+        catch(e1){ /* fallback by postId not available in this page */ }
+        toast('已删除评论');
+        if(email){ try{ await api('/api/messages', { method:'POST', body: JSON.stringify({ toEmail: email, text: `您的评论已被删除。原因：${reason}` }) }); }catch{} }
+      }catch(e){ toast('删除失败：'+e.message); }
+    }
+
+    async function deletePost(id, email){
+      const reason = prompt('确认删除该帖子。请输入删除原因（将会发送给作者）：','内容不符合发布规范');
+      if(reason===null) return;
+      try{
+        await api(`/api/posts/${id}`, { method:'DELETE' });
+        toast('已删除帖子');
+        if(email){ try{ await api('/api/messages', { method:'POST', body: JSON.stringify({ toEmail: email, text: `您的帖子已被删除。原因：${reason}` }) }); }catch{} }
+        loadPosts();
+      }catch(e){ toast('删除失败：'+e.message); }
+    }
+
+    document.addEventListener('DOMContentLoaded', ()=>{ renderBar(); loadPosts(); });
+  </script>
+
+    </main>
+  </div>
+
+  
+  <script>
+    const API_BASE = 'http://127.0.0.1:3001';
+    const $ = sel => document.querySelector(sel);
+    function toast(msg, ms=2000){ const el=$('#toast'); if(!el) return; el.textContent=msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'), ms); }
+    async function api(path, opt={}){
+      const url = path.startsWith('http')? path : API_BASE + path;
+      const res = await fetch(url, { credentials:'include', headers:{'Content-Type':'application/json', ...(opt.headers||{})}, ...opt });
+      if(!res.ok){ let text=''; try{text=await res.text()}catch{} throw new Error(res.status+': '+text); }
+      const ct = res.headers.get('content-type')||'';
+      return ct.includes('application/json')? res.json(): res.text();
+    }
+    async function hydrateAccount(){
+      // 管理员页面从localStorage获取管理员信息
+      const adminUser = JSON.parse(localStorage.getItem('adminUser') || localStorage.getItem('tempAdminUser') || '{}');
+      const name = adminUser.name || adminUser.nickname || '海外留学';
+      const avatar = adminUser.avatarPath || adminUser.avatar || '';
+      const n = document.querySelector('.username'); if(n) n.textContent = name;
+      const img = document.querySelector('.avatar'); if(img) img.src = avatar || '';
+    }
+    document.addEventListener('DOMContentLoaded', hydrateAccount);
+  </script>
+
+</body>
+</html>

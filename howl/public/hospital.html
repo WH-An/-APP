@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>海外留学 · 保险公司选择</title>
+  <style>
+    :root{--bg:#0b0f14; --panel:#ffffff; --text:#0f172a; --muted:#64748b; --accent:#16a34a; --border:#e5e7eb; --shadow:0 10px 30px rgba(0,0,0,.18); --radius:18px;}
+    *{box-sizing:border-box} html,body{height:100%}
+    body{margin:0;font-family:'Microsoft YaHei',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,'PingFang SC',sans-serif;
+      background:radial-gradient(1200px 600px at 10% -10%,#1f8db8 18%, transparent 60%),
+                 radial-gradient(900px 500px at 110% 110%,#2bb8d6 12%, transparent 60%),var(--bg);
+      color:#fff;overflow:hidden;}
+    .container{display:grid;grid-template-columns:220px 1fr;gap:18px;height:100vh;padding:24px}
+    .sidebar{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px 16px;color:var(--text);display:flex;flex-direction:column;gap:16px}
+    .account-info{display:flex;flex-direction:column;align-items:center;gap:10px;text-decoration:none;color:inherit;border:1px dashed #eef2ff;border-radius:14px;padding:14px;background:#fff}
+    .avatar{width:56px;height:56px;border-radius:50%;object-fit:cover}
+    .username{font-weight:700}
+    .nav-list{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:10px}
+    .nav-list a{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text);border:1px solid var(--border);background:#fafafa;border-radius:12px;padding:10px 14px;transition:.2s}
+    .nav-list a:hover{background:#f3f4f6;transform:translateY(-1px)}
+    .nav-icon{width:22px;display:inline-flex;justify-content:center}
+    .panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;color:var(--text);display:flex;flex-direction:column;gap:14px;height:100%}
+    .search-box{display:flex;gap:10px;flex-shrink:0}
+    .search-box input{flex:1;padding:10px 14px;border:1px solid var(--border);border-radius:12px;font-size:15px;outline:none}
+    .search-box button{padding:10px 16px;border:none;border-radius:12px;background:var(--accent);color:#fff;font-weight:700;cursor:pointer}
+    .search-box button:hover{background:#15803d}
+    .panel-header{display:flex;align-items:center;gap:12px;flex-shrink:0}
+    .panel-title{font-size:18px;font-weight:800;margin:0}
+    .panel-header .spacer{flex:1}
+    .btn{display:inline-flex;align-items:center;gap:8px;cursor:pointer;border:1px solid var(--border);background:#fff;color:#111827;border-radius:12px;padding:8px 12px;font-weight:700;transition:.2s}
+    .btn:hover{background:#f3f4f6}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="sidebar">
+      <a class="account-info" href="profile.html">
+        <img src="" alt="头像" class="avatar"><span class="username">我的账号</span>
+      </a>
+      <ul class="nav-list">
+        <li><a href="main page.html"><span class="nav-icon">🏠</span><span>主页</span></a></li>
+        <li><a href="life-tips.html"><span class="nav-icon">💡</span><span>生活小贴士</span></a></li>
+        <li><a href="study-guide.html"><span class="nav-icon">📚</span><span>学习指导</span></a></li>
+        <li><a href="enrollment-steps.html"><span class="nav-icon">📝</span><span>入学步骤</span></a></li>
+        <li><a href="share.html"><span class="nav-icon">🔗</span><span>分享</span></a></li>
+        <li><a href="fun.html"><span class="nav-icon">🎉</span><span>娱乐</span></a></li>
+        <li><a href="hospital.html"><span class="nav-icon">🏥</span><span>医院</span></a></li>
+      </ul>
+    </div>
+
+    <div class="panel">
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="搜索保险公司...">
+        <button onclick="alert('请输入关键词后再搜索')">搜索</button>
+      </div>
+      <div class="panel-header">
+        <h2 class="panel-title">保险公司</h2>
+        <div class="spacer"></div>
+        <select id="insuranceSelect" class="btn">
+          <option value="">请选择保险公司</option>
+          <option value="etiqa">Etiqa Family Takaful Berhad</option>
+          <option value="great-eastern">Great Eastern Takaful Berhad</option>
+          <option value="pacific">The Pacific Insurance Berhad</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 简单选择逻辑
+    document.getElementById('insuranceSelect').addEventListener('change', function() {
+      if (this.value) {
+        alert("您选择了: " + this.options[this.selectedIndex].text);
+      }
+    });
+    // 和你之前页面一致的最小依赖
+  const API_BASE = 'http://127.0.0.1:3001';
+
+  // 把相对路径头像补成绝对路径
+  function toAbs(u){
+    if(!u) return '';
+    if(/^https?:\/\//i.test(u)) return u;
+    return u.startsWith('/') ? API_BASE + u : API_BASE + '/' + u;
+  }
+
+  // 恢复：优先从服务器获取最新用户信息，回退到 localStorage
+  async function hydrateUser(){
+    try{
+      const avatarEl = document.querySelector('.avatar');
+      const nameEl   = document.querySelector('.username');
+
+      // 占位头像
+      const FALLBACK = 'data:image/svg+xml;utf8,'+encodeURIComponent(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128"><rect width="100%" height="100%" fill="#e5e7eb"/><circle cx="64" cy="54" r="26" fill="#cbd5e1"/><rect x="24" y="86" width="80" height="28" rx="14" fill="#cbd5e1"/></svg>'
+      );
+
+      // 优先从服务器获取最新用户信息
+      try {
+        const response = await fetch(API_BASE + '/api/users/me', { 
+          credentials: 'include' 
+        });
+        
+        if (response.ok) {
+          const user = await response.json();
+          const name = user.nickname || user.username || user.displayName || user.name || user.email || '我的账号';
+          let avatar = user.avatarPath || user.avatarUrl || user.avatar || '';
+
+          if(avatar && !/^https?:\/\//i.test(avatar)) {
+            avatar = toAbs(avatar);
+          }
+
+          nameEl.textContent = name;
+          nameEl.title = name;
+          avatarEl.onerror = ()=>{ avatarEl.src = FALLBACK; };
+          avatarEl.src = avatar || FALLBACK;
+          avatarEl.alt = name;
+          
+          // 更新本地存储
+          localStorage.setItem('currentUser', JSON.stringify(user));
+          return;
+        }
+      } catch (e) {
+        console.warn('从服务器获取用户信息失败，使用本地存储:', e);
+      }
+
+      // 如果服务器获取失败，回退到本地存储
+      const raw = localStorage.getItem('currentUser')
+                || localStorage.getItem('user')
+                || localStorage.getItem('USER')
+                || localStorage.getItem('auth_user');
+
+      if(!raw){
+        nameEl.textContent = '我的账号';
+        avatarEl.src = FALLBACK;
+        return;
+      }
+
+      const u = JSON.parse(raw) || {};
+      const name = u.nickname || u.username || u.displayName || u.name || u.email || '我的账号';
+      let avatar = u.avatarPath || u.avatarUrl || u.avatar || '';
+
+      if(avatar && !/^https?:\/\//i.test(avatar)) {
+        avatar = toAbs(avatar);
+      }
+
+      nameEl.textContent = name;
+      nameEl.title = name;
+      avatarEl.onerror = ()=>{ avatarEl.src = FALLBACK; };
+      avatarEl.src = avatar || FALLBACK;
+      avatarEl.alt = name;
+    }catch(e){
+      console.error('用户信息渲染失败:', e);
+      // 出错也给个兜底
+      const avatarEl = document.querySelector('.avatar');
+      const nameEl   = document.querySelector('.username');
+      nameEl.textContent = '我的账号';
+      avatarEl.src = FALLBACK;
+    }
+  }
+
+  // 页面就绪后执行
+  window.addEventListener('DOMContentLoaded', () => {
+    hydrateUser();
+  });
+  </script>
+</body>
+</html>

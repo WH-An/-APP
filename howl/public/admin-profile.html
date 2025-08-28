@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>管理员档案 · 编辑</title>
+  <style>
+    :root{--bg:#0b0f14;--panel:#ffffff;--text:#0f172a;--muted:#64748b;--accent:#16a34a;--danger:#ef4444;--border:#e5e7eb;--shadow:0 10px 30px rgba(0,0,0,.18);--radius:18px}
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:'Microsoft YaHei',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,'PingFang SC',sans-serif;background:radial-gradient(1200px 600px at 10% -10%,#1f8db8 18%, transparent 60%),radial-gradient(900px 500px at 110% 110%,#2bb8d6 12%, transparent 60%),var(--bg);color:#fff}
+    .layout{display:grid;grid-template-columns:220px 1fr;gap:18px;height:100vh;padding:24px;overflow:hidden}
+    .sidebar{background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px 16px;display:flex;flex-direction:column;gap:16px}
+    .account-info{display:flex;flex-direction:column;align-items:center;gap:10px;text-decoration:none;color:inherit;border:1px dashed #eef2ff;border-radius:14px;padding:14px;background:#fff}
+    .avatar{width:72px;height:72px;border-radius:50%;object-fit:cover}
+    .username{font-weight:700}
+    .nav-list{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:10px}
+    .nav-list a{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text);border:1px solid var(--border);background:#fafafa;border-radius:12px;padding:10px 14px;transition:.2s}
+    .nav-list a:hover{background:#f3f4f6;transform:translateY(-1px)}
+    .nav-icon{width:22px;display:inline-flex;justify-content:center}
+
+    .main{background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;display:flex;flex-direction:column;gap:14px;height:100%;overflow:auto}
+    h1{font-size:18px;margin:0;display:flex;align-items:center;gap:10px}
+    .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;border:1px solid var(--border);border-radius:999px;padding:4px 8px;background:#fff}
+    .badge.admin{border-color:#bbf7d0;background:#f0fdf4;color:#166534}
+
+    .profile-card{display:grid;grid-template-columns:160px 1fr;gap:18px;border:1px solid var(--border);border-radius:16px;background:#fff;box-shadow:0 6px 18px rgba(0,0,0,.06);padding:16px}
+    .profile-card .big-avatar{width:140px;height:140px;border-radius:16px;object-fit:cover;border:1px solid var(--border)}
+    .field{display:flex;gap:10px;align-items:center;margin:10px 0}
+    .field .label{width:100px;color:#64748b;font-size:12px}
+    .field .value{font-size:14px;color:#111827}
+    .input{border:1px solid var(--border);border-radius:12px;padding:8px 10px;font-size:14px;width:100%}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+    .btn{display:inline-flex;align-items:center;gap:8px;cursor:pointer;border:1px solid var(--border);background:#fff;color:#111827;border-radius:12px;padding:8px 12px;font-weight:700;transition:.15s;text-decoration:none}
+    .btn:hover{background:#f3f4f6}
+    .btn.primary{border-color:#a7f3d0;background:#ecfdf5;color:#065f46}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    @media (max-width:900px){ .profile-card{grid-template-columns:1fr} .grid2{grid-template-columns:1fr} }
+    .panel{border:1px solid var(--border);border-radius:16px;background:#fff;box-shadow:0 6px 18px rgba(0,0,0,.06);padding:16px}
+    .panel h2{font-size:16px;margin:0 0 10px 0}
+    .small{font-size:12px;color:#64748b}
+    .divider{height:1px;background:#e5e7eb;margin:8px 0}
+    .toast{position:fixed;right:16px;bottom:16px;background:#0f172a;color:#fff;border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:10px 14px;box-shadow:0 10px 24px rgba(0,0,0,.3);opacity:0;transform:translateY(6px);transition:.2s;z-index:9999}
+    .toast.show{opacity:1;transform:translateY(0)}
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <a class="account-info" href="admin-profile.edit.html">
+        <img src="" alt="头像" class="avatar" id="sidebarAvatar">
+        <span class="username" id="sidebarName">我的账号</span>
+      </a>
+      <ul class="nav-list">
+        <li><a href="admin-all.html"><span class="nav-icon">⚙️</span><span>后台管理</span></a></li>
+        <li><a href="admin-publish.html"><span class="nav-icon">📝</span><span>发布内容</span></a></li>
+        <li><a href="admin-posts.html"><span class="nav-icon">📋</span><span>帖子管理</span></a></li>
+      </ul>
+    </aside>
+
+    <main class="main">
+      <h1>管理员档案 <span class="badge admin">管理员</span></h1>
+
+      <section class="profile-card">
+        <img id="avatar" class="big-avatar" src="" alt="管理员头像">
+        <div>
+          <div class="field"><div class="label">显示名称</div><input id="displayName" class="input" placeholder="请输入用户名"/></div>
+          <div class="field"><div class="label">邮箱</div><div class="value" id="emailText">—</div></div>
+          <div class="field"><div class="label">角色</div><div class="value" id="role">—</div></div>
+          <div class="field"><div class="label">创建时间</div><div class="value" id="createdAt">—</div></div>
+          <div class="field"><div class="label">头像 URL</div><input id="avatarUrl" class="input" placeholder="https://.../avatar.jpg"/></div>
+          <div class="field"><div class="label">上传头像</div><input id="avatarFile" type="file" accept="image/*"/></div>
+          <div class="actions">
+            <button class="btn primary" id="saveBtn">保存修改</button>
+            <span class="small" id="saveHint">可直接粘贴头像 URL，或上传图片尝试自动上传。</span>
+          </div>
+        </div>
+      </section>
+
+      <div class="grid2">
+        <section class="panel">
+          <h2>说明</h2>
+          <div class="small">此页支持修改 <strong>头像</strong> 与 <strong>用户名</strong>。保存时将尝试调用：<code>PATCH /api/users/me</code>（若不可用会尝试 PUT/POST）。上传头像将尝试常见上传端点（如 <code>/api/upload</code>）。</div>
+        </section>
+
+        <section class="panel">
+          <h2>安全提醒</h2>
+          <div class="small">当前项目调试使用固定管理员（<code>hwlx@hwlx.com / hwlx</code>）。上线前请改为数据库用户体系并启用权限校验。</div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const API_BASE = 'http://127.0.0.1:3001';
+    const $ = sel => document.querySelector(sel);
+    function toast(msg, ms=2000){ const el=$('#toast'); el.textContent=msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'), ms); }
+    async function api(path, opt={}){
+      const url = path.startsWith('http')? path : API_BASE + path;
+      const res = await fetch(url, { credentials:'include', headers:{'Content-Type':'application/json', ...(opt.headers||{})}, ...opt });
+      if(!res.ok){ let t=''; try{t=await res.text()}catch{} throw new Error(res.status+': '+t); }
+      const ct = res.headers.get('content-type')||'';
+      return ct.includes('application/json')? res.json(): res.text();
+    }
+    async function uploadFile(file){
+      const endpoints = ['/api/upload','/api/uploads','/api/files','/api/images','/upload','/uploads'];
+      for(const ep of endpoints){
+        try{
+          const fd = new FormData(); fd.append('file', file);
+          const res = await fetch(API_BASE+ep, { method:'POST', body: fd, credentials:'include' });
+          if(!res.ok) throw new Error('HTTP '+res.status);
+          const ct = res.headers.get('content-type')||'';
+          if(ct.includes('application/json')){
+            const data = await res.json();
+            const url = data.url || data.path || data.location || data.file || data.avatar || '';
+            if(url) return url;
+          }else{
+            const text = await res.text();
+            // 尝试从纯文本返回中提取 URL
+            const m = text.match(/https?:[^\s'"]+/);
+            if(m) return m[0];
+          }
+        }catch(e){ /* try next */ }
+      }
+      throw new Error('没有可用的上传端点');
+    }
+    function toAbs(url){ if(!url) return ''; if(/^https?:\/\//i.test(url)) return url; return url.startsWith('/') ? (API_BASE + url) : (API_BASE + '/' + url); }
+
+    async function hydrate(){
+      try{
+        // 管理员页面从localStorage获取管理员信息
+        const adminUser = JSON.parse(localStorage.getItem('adminUser') || localStorage.getItem('tempAdminUser') || '{}');
+        const name   = adminUser.name || adminUser.nickname || '海外留学';
+        const email  = adminUser.email || 'hwlx@hwlx.com';
+        const role   = 'admin';
+        const avatar = adminUser.avatarPath || adminUser.avatar || ''; // 从localStorage获取头像
+        const created= '—';
+
+        $('#displayName').value = name;
+        $('#sidebarName').textContent = name;
+        $('#sidebarName').title = name;
+        $('#role').textContent = role === 'admin' ? '管理员' : role;
+        $('#createdAt').textContent = created;
+        $('#emailText').textContent = email;
+        const FALLBACK_AVATAR = 'data:image/svg+xml;utf8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128"><rect width="100%" height="100%" fill="#e5e7eb"/><circle cx="64" cy="54" r="26" fill="#cbd5e1"/><rect x="24" y="86" width="80" height="28" rx="14" fill="#cbd5e1"/></svg>');
+        $('#avatar').src = avatar? toAbs(avatar): FALLBACK_AVATAR;
+        $('#avatar').alt = name;
+        $('#avatar').onerror = () => { $('#avatar').src = FALLBACK_AVATAR; };
+        $('#sidebarAvatar').src = avatar? toAbs(avatar): FALLBACK_AVATAR;
+        $('#sidebarAvatar').alt = name;
+        $('#sidebarAvatar').onerror = () => { $('#sidebarAvatar').src = FALLBACK_AVATAR; };
+        $('#avatarUrl').value = avatar || '';
+      }catch(e){
+        console.error('读取用户资料失败:', e);
+        toast('读取资料失败：'+e.message);
+        
+        // 设置默认值
+        const FALLBACK_AVATAR = 'data:image/svg+xml;utf8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128"><rect width="100%" height="100%" fill="#e5e7eb"/><circle cx="64" cy="54" r="26" fill="#cbd5e1"/><rect x="24" y="86" width="80" height="28" rx="14" fill="#cbd5e1"/></svg>');
+        $('#displayName').value = '海外留学';
+        $('#sidebarName').textContent = '海外留学';
+        $('#sidebarName').title = '海外留学';
+        $('#role').textContent = '管理员';
+        $('#createdAt').textContent = '—';
+        $('#emailText').textContent = 'hwlx@hwlx.com';
+        $('#avatar').src = FALLBACK_AVATAR;
+        $('#avatar').alt = '海外留学';
+        $('#sidebarAvatar').src = FALLBACK_AVATAR;
+        $('#sidebarAvatar').alt = '海外留学';
+        $('#avatarUrl').value = '';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', async ()=>{
+      await hydrate();
+
+      // 预览本地选择的头像
+      $('#avatarFile').addEventListener('change', (e)=>{
+        const f = e.target.files && e.target.files[0];
+        if(!f) return;
+        const reader = new FileReader();
+        reader.onload = ev => { $('#avatar').src = ev.target.result; };
+        reader.readAsDataURL(f);
+      });
+
+      $('#saveBtn').addEventListener('click', async ()=>{
+        try{
+          $('#saveHint').textContent = '保存中…';
+          let avatarUrl = ($('#avatarUrl').value||'').trim();
+          const file = ($('#avatarFile').files||[])[0];
+          
+          // 如果有文件，先上传
+          if(file){ 
+            try{
+              const uploaded = await uploadFile(file);
+              avatarUrl = uploaded || avatarUrl;
+              toast('头像上传成功');
+            }catch(e){
+              toast('上传头像失败：'+e.message+'；将尝试使用头像URL字段保存');
+            }
+          }
+          
+          // 准备保存数据
+          const payload = {
+            name: ($('#displayName').value||'').trim() || undefined,
+            avatar: avatarUrl || undefined,
+            avatarUrl: avatarUrl || undefined
+          };
+          
+          // 管理员头像保存：只更新localStorage，不调用服务器API
+          // 这样可以避免影响普通用户信息
+          console.log('管理员头像保存：只更新localStorage');
+          ok = true; // 直接标记为成功
+          toast('已保存');
+          $('#saveHint').textContent = '已保存';
+          
+          // 立即更新显示
+          const newName = ($('#displayName').value||'').trim();
+          if(newName) {
+            $('#sidebarName').textContent = newName;
+            $('#sidebarName').title = newName;
+          }
+          
+          if(avatarUrl) {
+            const absUrl = toAbs(avatarUrl);
+            $('#avatar').src = absUrl;
+            $('#sidebarAvatar').src = absUrl;
+            $('#avatarUrl').value = avatarUrl;
+          }
+          
+          // 更新localStorage中的管理员信息
+          const adminUser = JSON.parse(localStorage.getItem('adminUser') || localStorage.getItem('tempAdminUser') || '{}');
+          adminUser.name = newName || adminUser.name;
+          adminUser.avatarPath = avatarUrl || adminUser.avatarPath;
+          localStorage.setItem('adminUser', JSON.stringify(adminUser));
+          
+          // 管理员页面不需要重新获取用户信息，避免影响普通用户
+          // await hydrate();
+        }catch(e){
+          toast('保存失败：'+e.message);
+          $('#saveHint').textContent = '保存失败';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

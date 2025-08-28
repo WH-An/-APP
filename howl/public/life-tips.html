@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>海外留学 · 生活小贴士</title>
+  <style>
+    :root{ --bg:#0b0f14; --panel:#ffffff; --text:#0f172a; --muted:#64748b; --accent:#16a34a; --border:#e5e7eb; --shadow:0 10px 30px rgba(0,0,0,.18); --radius:18px; }
+    *{box-sizing:border-box} html,body{height:100%}
+    body{
+      margin:0;font-family:'Microsoft YaHei',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,'PingFang SC',sans-serif;
+      background:radial-gradient(1200px 600px at 10% -10%,#1f8db8 18%, transparent 60%), radial-gradient(900px 500px at 110% 110%,#2bb8d6 12%, transparent 60%), var(--bg);
+      color:#fff; overflow:hidden;
+    }
+    .container{display:grid; grid-template-columns:220px 1fr; gap:18px; height:100vh; padding:24px;}
+    .sidebar{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:20px 16px; color:var(--text); display:flex; flex-direction:column; gap:16px}
+    .account-info{display:flex; flex-direction:column; align-items:center; gap:10px; text-decoration:none; color:inherit; border:1px dashed #eef2ff; border-radius:14px; padding:14px; background:#fff}
+    .avatar{width:56px;height:56px;border-radius:50%;object-fit:cover}
+    .username{font-weight:700}
+    .nav-list{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:10px}
+    .nav-list a{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text);border:1px solid var(--border);background:#fafafa;border-radius:12px;padding:10px 14px;transition:.2s}
+    .nav-list a:hover{background:#f3f4f6;transform:translateY(-1px)}
+    .nav-icon{width:22px;display:inline-flex;justify-content:center}
+
+    .panel{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:18px; color:var(--text); display:flex; flex-direction:column; gap:14px; height:100%; overflow-y:auto}
+    .search-box{display:flex; gap:10px; flex-shrink:0}
+    .search-box input{flex:1; padding:10px 14px; border:1px solid var(--border); border-radius:12px; font-size:15px; outline:none;}
+    .search-box button{padding:10px 16px; border:none; border-radius:12px; background:var(--accent); color:#fff; font-weight:700; cursor:pointer}
+    .search-box button:hover{background:#15803d}
+    .panel-header{display:flex;align-items:center;gap:12px;flex-shrink:0}
+    .panel-title{font-size:18px;font-weight:800;margin:0}
+    .panel-header .spacer{flex:1}
+    .btn{display:inline-flex;align-items:center;gap:8px;cursor:pointer;border:1px solid var(--border);background:#fff;color:#111827;border-radius:12px;padding:8px 12px;font-weight:700;transition:.2s}
+    .btn:hover{background:#f3f4f6}
+
+    /* === Masonry：多列布局，减少空白 === */
+    .masonry{ column-count:3; column-gap:14px; }
+    @media (max-width:1200px){ .masonry{ column-count:2; } }
+    @media (max-width:640px){  .masonry{ column-count:1; } }
+
+    /* 卡片：列内排列 + 预留徽章空间 */
+    .card{
+      position:relative; display:inline-block; width:100%; margin:0 0 14px;
+      border:1px solid var(--border); background:#fff; border-radius:14px; overflow:hidden;
+      box-shadow:0 6px 18px rgba(0,0,0,.06); padding-bottom:46px;
+      break-inside:avoid; -webkit-column-break-inside:avoid; page-break-inside:avoid;
+    }
+    .card img{ width:100%; display:block; aspect-ratio:4/5; object-fit:cover }
+    .card-text{ padding:10px 12px; color:#374151; line-height:1.6 }
+
+    /* 作者徽章：下移，与内容底对齐 */
+    .author-badge{
+      position:absolute; right:10px; bottom:8px;
+      display:flex; align-items:center; gap:8px;
+      background:rgba(255,255,255,.92); border:1px solid var(--border);
+      padding:6px 8px; border-radius:999px; box-shadow:0 4px 12px rgba(0,0,0,.10);
+      max-width:80%; cursor:pointer;
+    }
+    .author-badge img{width:22px;height:22px;border-radius:50%;object-fit:cover}
+    .author-badge .name{font-size:12px;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px}
+
+    /* 悬停反馈（可选） */
+    .card[role="link"]{ transition: transform .12s ease, box-shadow .12s ease; }
+    .card[role="link"]:hover{ transform: translateY(-2px); box-shadow:0 10px 24px rgba(0,0,0,.12); }
+
+    #chatFab{ position:fixed; left:16px; bottom:16px; width:48px; height:48px; border-radius:9999px; display:flex; align-items:center; justify-content:center; background:#0f172a; color:#fff; border:1px solid rgba(255,255,255,.15); box-shadow:0 10px 24px rgba(0,0,0,.28); cursor:pointer; user-select:none; z-index:9999; transition: transform .15s, box-shadow .15s, opacity .2s }
+    #chatFab:hover{ transform: translateY(-1px); box-shadow: 0 14px 28px rgba(0,0,0,.32) }
+    #chatFab:active{ transform: translateY(0); box-shadow: 0 8px 18px rgba(0,0,0,.26) }
+    #chatFab .badge{ position:absolute; right:-2px; top:-2px; min-width:18px; height:18px; padding:0 5px; display:none; align-items:center; justify-content:center; background:#ef4444; color:#fff; border-radius:9999px; font-size:11px; line-height:18px; box-shadow:0 2px 6px rgba(0,0,0,.18) }
+    @media (max-width:480px){ #chatFab{ left:12px; bottom:12px; width:44px; height:44px } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="sidebar">
+      <a class="account-info" href="profile.html">
+        <img src="" alt="头像" class="avatar"><span class="username">我的账号</span>
+      </a>
+      <ul class="nav-list">
+        <li><a href="main page.html"><span class="nav-icon">🏠</span><span>主页</span></a></li>
+        <li><a href="life-tips.html"><span class="nav-icon">💡</span><span>生活小贴士</span></a></li>
+        <li><a href="study-guide.html"><span class="nav-icon">📚</span><span>学习指导</span></a></li>
+        <li><a href="enrollment-steps.html"><span class="nav-icon">📝</span><span>入学步骤</span></a></li>
+        <li><a href="share.html"><span class="nav-icon">🔗</span><span>分享</span></a></li>
+        <li><a href="fun.html"><span class="nav-icon">🎉</span><span>娱乐</span></a></li>
+        <li><a href="hospital.html"><span class="nav-icon">🏥</span><span>医院</span></a></li>
+      </ul>
+    </div>
+
+    <div class="panel">
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="搜索小贴士...">
+        <button onclick="doSearch()">搜索</button>
+      </div>
+
+      <div class="panel-header">
+        <h2 class="panel-title">生活小贴士</h2>
+        <div class="spacer"></div>
+        <a class="btn" href="publish.html" title="去发布">＋ 去发布</a>
+      </div>
+
+      <div class="masonry" id="masonry"></div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'http://127.0.0.1:3001';
+    const CATEGORY = 'life';
+    let allPosts = [];
+
+    function toAbs(url){
+      if(!url) return '';
+      if(/^https?:\/\//i.test(url)) return url;
+      return url.startsWith('/') ? (API_BASE + url) : (API_BASE + '/' + url);
+    }
+
+    async function hydrateUser(){
+      try{
+        const avatarEl = document.querySelector('.avatar');
+        const nameEl   = document.querySelector('.username');
+        const FALLBACK = 'data:image/svg+xml;utf8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128"><rect width="100%" height="100%" fill="#e5e7eb"/><circle cx="64" cy="54" r="26" fill="#cbd5e1"/><rect x="24" y="86" width="80" height="28" rx="14" fill="#cbd5e1"/></svg>');
+        
+        // 优先从服务器获取最新用户信息
+        try {
+          const response = await fetch(API_BASE + '/api/users/me', { 
+            credentials: 'include' 
+          });
+          
+          if (response.ok) {
+            const user = await response.json();
+            const displayName = user.nickname||user.username||user.displayName||user.name||user.email||'我的账号';
+            let avatar = user.avatarPath||user.avatarUrl||user.avatar||'';
+            if (avatar && !/^https?:\/\//i.test(avatar)) avatar = avatar.startsWith('/') ? (API_BASE+avatar) : (API_BASE+'/'+avatar);
+            
+            nameEl.textContent = displayName; nameEl.title = displayName;
+            avatarEl.onerror = ()=>{ avatarEl.src = FALLBACK }; avatarEl.src = avatar||FALLBACK; avatarEl.alt = displayName;
+            
+            // 更新本地存储
+            localStorage.setItem('currentUser', JSON.stringify(user));
+            return;
+          }
+        } catch (e) {
+          console.warn('从服务器获取用户信息失败，使用本地存储:', e);
+        }
+
+        // 如果服务器获取失败，回退到本地存储
+        const raw = localStorage.getItem('currentUser')||localStorage.getItem('user')||localStorage.getItem('USER')||localStorage.getItem('auth_user');
+        if(!raw){ nameEl.textContent='我的账号'; avatarEl.src=FALLBACK; return; }
+        const u = JSON.parse(raw)||{};
+        const displayName = u.nickname||u.username||u.displayName||u.name||u.email||'我的账号';
+        let avatar = u.avatarPath||u.avatarUrl||u.avatar||'';
+        if (avatar && !/^https?:\/\//i.test(avatar)) avatar = avatar.startsWith('/') ? (API_BASE+avatar) : (API_BASE+'/'+avatar);
+        nameEl.textContent = displayName; nameEl.title = displayName;
+        avatarEl.onerror = ()=>{ avatarEl.src = FALLBACK }; avatarEl.src = avatar||FALLBACK; avatarEl.alt = displayName;
+      }catch(e){
+        console.error('用户信息渲染失败:', e);
+        const avatarEl = document.querySelector('.avatar');
+        const nameEl = document.querySelector('.username');
+        if(nameEl) nameEl.textContent = '我的账号';
+        if(avatarEl) avatarEl.src = FALLBACK;
+      }
+    }
+
+    function extractAuthor(p){
+      const u = p.user || p.author || p.owner || {};
+      let name   = (p.authorName || u.nickname || u.username || u.displayName || u.name || p.username || p.email || '').trim();
+      let avatar = (p.authorAvatar || u.avatarPath || u.avatarUrl || u.avatar || p.avatar || '').trim();
+      let email  = (p.authorEmail || u.email || '').trim();
+      if (!name) name = '匿名用户';
+      if (avatar && !/^https?:\/\//i.test(avatar)) avatar = toAbs(avatar);
+      return { name, avatar, email };
+    }
+
+    function renderPosts(posts){
+      const masonry=document.getElementById('masonry');
+      masonry.innerHTML='';
+      (posts||[]).forEach(post=>{
+        const card=document.createElement('div');
+        card.className='card';
+
+        // 置顶标记
+        if(post.pinned){
+          const pinBadge = document.createElement('div');
+          pinBadge.style.cssText = `
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: #16a34a;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 700;
+            z-index: 10;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+          `;
+          pinBadge.textContent = '📌 置顶';
+          card.appendChild(pinBadge);
+        }
+
+        // 图片
+        (post.images||[]).forEach(src=>{
+          const img=document.createElement('img');
+          img.loading='lazy';
+          img.src=toAbs(src);
+          card.appendChild(img);
+        });
+
+        // 文本
+        if(post.desc){
+          const desc=document.createElement('div');
+          desc.className='card-text';
+          desc.textContent=post.desc;
+          card.appendChild(desc);
+        }
+
+        // 作者徽章（点击徽章不触发整卡跳转）
+        const {name, avatar, email}=extractAuthor(post);
+        const badge=document.createElement('div');
+        badge.className='author-badge';
+        badge.addEventListener('click', e=> e.stopPropagation());
+
+        const ava=document.createElement('img');
+        ava.alt=name;
+        const FALLBACK_AVA='data:image/svg+xml;utf8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="100%" height="100%" fill="#e5e7eb"/><circle cx="32" cy="26" r="12" fill="#cbd5e1"/><rect x="12" y="44" width="40" height="14" rx="7" fill="#cbd5e1"/></svg>');
+        ava.onerror=()=>{ava.src=FALLBACK_AVA};
+        ava.src=avatar||FALLBACK_AVA;
+
+        const span=document.createElement('span');
+        span.className='name';
+        span.textContent=name;
+
+        if (email){
+          const a=document.createElement('a');
+          a.href='profile.html?email='+encodeURIComponent(email);
+          a.title='查看 '+name+' 的主页';
+          a.appendChild(ava);
+          badge.appendChild(a);
+        }else{
+          badge.appendChild(ava);
+        }
+        badge.appendChild(span);
+        card.appendChild(badge);
+
+        // === 详情页跳转：整卡可点击 ===
+        const pid = String(post._id || post.id || post.postId || '');
+        if (pid) {
+          const go = () => location.href = `post.html?id=${encodeURIComponent(pid)}`;
+          card.style.cursor = 'pointer';
+          card.setAttribute('role','link');
+          card.tabIndex = 0;
+          card.addEventListener('click', go);
+          card.addEventListener('keydown', e=>{ if(e.key==='Enter') go(); });
+        }
+
+        masonry.appendChild(card);
+      });
+    }
+
+    async function loadPosts(){
+      try{
+        const res = await fetch(`${API_BASE}/api/posts?category=${encodeURIComponent(CATEGORY)}`, { credentials:'include' });
+        allPosts = await res.json();
+        // 兜底筛选（如果后端暂没实现 ?category）
+        try{
+          const c = (CATEGORY||'').toLowerCase();
+          if(c){ allPosts = (allPosts||[]).filter(p => String(p.category||p.cat||p.type||'').toLowerCase() === c); }
+        }catch{}
+        
+        // 排序：置顶帖子优先，然后按时间倒序
+        allPosts = (allPosts || []).sort((a, b) => {
+          const aPinned = Boolean(a.pinned);
+          const bPinned = Boolean(b.pinned);
+          if (aPinned !== bPinned) {
+            return bPinned ? 1 : -1; // 置顶的排在前面
+          }
+          // 同置顶状态下，按时间倒序
+          const aTime = new Date(a.createdAt || a.time || 0);
+          const bTime = new Date(b.createdAt || b.time || 0);
+          return bTime - aTime;
+        });
+        
+        renderPosts(allPosts);
+      }catch(e){ console.warn('拉取帖子失败：',e); renderPosts([]); }
+    }
+
+    function doSearch(){
+      const q=document.getElementById('searchInput').value.trim().toLowerCase();
+      if(!q) return renderPosts(allPosts);
+      renderPosts(allPosts.filter(p=>(p.title&&p.title.toLowerCase().includes(q))||(p.desc&&p.desc.toLowerCase().includes(q))));
+    }
+
+    window.onload = async () => {
+      await hydrateUser();
+      loadPosts();
+      document.getElementById('searchInput').addEventListener('keydown', e=>{ if(e.key==='Enter') doSearch(); });
+    };
+
+    /* 浮动消息按钮（原样保留） */
+    (function(){
+      const BASE_URL = 'http://127.0.0.1:3001';
+      const MESSAGES_PATH = '/public/messages.html';
+      let fab = document.getElementById('chatFab');
+      if(!fab){
+        fab = document.createElement('button');
+        fab.id = 'chatFab';
+        fab.setAttribute('aria-label','消息');
+        fab.title = '消息';
+        fab.innerHTML = '💬';
+        const badge = document.createElement('span');
+        badge.className = 'badge';
+        fab.appendChild(badge);
+        fab.addEventListener('click', ()=> location.href = MESSAGES_PATH);
+        document.body.appendChild(fab);
+      }
+      const badgeEl = fab.querySelector('.badge');
+      const READ_KEY = (me, peer) => `read:${(me||'').toLowerCase()}::${(peer||'').toLowerCase()}`;
+
+      async function apiMe(){ const r = await fetch(BASE_URL + '/api/users/me', { credentials:'include' }); if(!r.ok) throw new Error('未登录'); return r.json(); }
+      async function apiThreads(){ const r = await fetch(BASE_URL + '/api/messages/threads', { credentials:'include' }); if(!r.ok) throw new Error('threads ' + r.status); return r.json(); }
+      async function apiDialog(peer){ const r = await fetch(BASE_URL + '/api/messages?peer=' + encodeURIComponent(peer), { credentials:'include' }); if(!r.ok) throw new Error('dialog ' + r.status); return r.json(); }
+
+      async function computeUnreadTotal(){
+        let me; try { me = await apiMe(); } catch { setBadge(0); return; }
+        const meMail = (me.email||'').toLowerCase();
+        let total = 0;
+        let threads = []; try { threads = await apiThreads(); } catch { setBadge(0); return; }
+        for(const t of threads){
+          const peer = (t.peer||'').trim();
+          try{
+            const msgs = await apiDialog(peer);
+            const lastReadISO = localStorage.getItem(READ_KEY(meMail, peer.toLowerCase())) || '1970-01-01T00:00:00.000Z';
+            const lastRead = new Date(lastReadISO);
+            const unread = msgs.filter(m => String(m.to||'').toLowerCase() === meMail && new Date(m.time) > lastRead).length;
+            total += unread;
+          }catch{}
+        }
+        setBadge(total);
+      }
+      function setBadge(n){ if(!badgeEl) return; if(n>0){ badgeEl.style.display='flex'; badgeEl.textContent = n>99 ? '99+' : String(n); } else { badgeEl.style.display='none'; } }
+      computeUnreadTotal();
+      let timer = setInterval(computeUnreadTotal, 15000);
+      document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState === 'visible') computeUnreadTotal(); });
+      window.addEventListener('beforeunload', ()=> clearInterval(timer));
+    })();
+
+/* 生活小贴士页：按作者地区过滤（仅显隐，不改结构/样式）
+   关键点：
+   1) 包装 renderPosts，在每次渲染后记录 __renderedPosts__ 并立即过滤
+   2) 默认“全部”→ 显示所有
+   3) 具体地区→ 以 authorEmail 查询 /api/users/by-email 获取作者 area 来判断
+   4) 没邮箱或查不到地区 → 默认显示（更友好）
+*/
+(function(){
+  const API_BASE = 'http://127.0.0.1:3001';
+  const REGION_KEY = 'region';
+  const DEFAULT_REGION = '全部';
+  const ITEM_SELECTOR = '.card';            // 你的卡片类名
+  const LIST = document.getElementById('masonry');
+
+  const norm = s => String(s||'').replace(/\s+/g,'').toLowerCase();
+  const getRegion = () => localStorage.getItem(REGION_KEY) || DEFAULT_REGION;
+
+  // 缓存：email -> area
+  const areaMap = new Map();
+  async function fetchAreaByEmail(email){
+    const key = (email||'').trim().toLowerCase();
+    if(!key) return '';
+    if(areaMap.has(key)) return areaMap.get(key);
+    try{
+      const r = await fetch(`${API_BASE}/api/users/by-email?email=${encodeURIComponent(key)}`, { credentials:'include' });
+      if(!r.ok){ areaMap.set(key, ''); return ''; }
+      const u = await r.json();
+      const area = (u.area || '').trim();
+      areaMap.set(key, area);
+      return area;
+    }catch{
+      areaMap.set(key, ''); return '';
+    }
+  }
+
+  async function preloadAreas(posts){
+    const emails = [...new Set((posts||[]).map(p => (p.authorEmail||'').trim().toLowerCase()).filter(Boolean))];
+    await Promise.all(emails.map(fetchAreaByEmail));
+  }
+
+  async function applyRegionFilter(posts){
+    const region = getRegion();
+    const want = norm(region);
+    const cards = Array.from(document.querySelectorAll(ITEM_SELECTOR));
+    // 用“实际渲染的帖子数组”对齐 DOM，避免索引错位
+    const arr = Array.isArray(posts) ? posts : [];
+    const n = Math.min(cards.length, arr.length);
+    if (n === 0) return;
+
+    // 预取地区
+    await preloadAreas(arr);
+
+    let shown = 0;
+    for (let i=0; i<n; i++){
+      const card = cards[i];
+      const post = arr[i] || {};
+      const email = (post.authorEmail || '').trim().toLowerCase();
+
+      // “全部”→全部显示
+      if (want === norm(DEFAULT_REGION)) {
+        card.style.display = '';
+        card.setAttribute('aria-hidden','false');
+        shown++; continue;
+      }
+
+      // 没邮箱或查不到地区 → 默认显示
+      const area = (email && areaMap.get(email)) || '';
+      if (!email || !area) {
+        card.style.display = '';
+        card.setAttribute('aria-hidden','false');
+        shown++; continue;
+      }
+
+      const hit = norm(area).includes(want);
+      card.style.display = hit ? '' : 'none';
+      card.setAttribute('aria-hidden', hit ? 'false' : 'true');
+      if (hit) shown++;
+    }
+
+    const counter = document.querySelector('#resultCount');
+    if (counter) counter.textContent = String(shown);
+  }
+
+  // —— 包装 renderPosts：渲染后立刻过滤 —— //
+  const _origRenderPosts = window.renderPosts;
+  if (typeof _origRenderPosts === 'function'){
+    window.renderPosts = function(posts){
+      _origRenderPosts(posts);
+      // 记录“实际渲染的帖子”，无论是全量还是搜索后的子集
+      window.__renderedPosts__ = posts || [];
+      // 立刻按地区过滤一次
+      applyRegionFilter(window.__renderedPosts__);
+    };
+  }
+
+  // 初次进入：如果列表已渲染，跑一次；否则等 MutationObserver 触发
+  const firstRun = () => applyRegionFilter(window.__renderedPosts__ || []);
+  if (window.MutationObserver && LIST){
+    const mo = new MutationObserver(()=> firstRun());
+    mo.observe(LIST, { childList:true, subtree:false });
+  }
+  firstRun();
+
+  // 监听“主页切换地区”事件
+  document.addEventListener('regionchange', ()=>{
+    applyRegionFilter(window.__renderedPosts__ || []);
+  });
+})();
+  </script>
+</body>
+</html>

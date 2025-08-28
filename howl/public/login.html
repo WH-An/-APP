@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>用户登录 · Study Portal</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* 保留你的原样式不变 */
+    :root{
+      --bg1:#6dd5ed; --bg2:#2193b0; --card-bg: rgba(255,255,255,.86); --card-border: rgba(255,255,255,.4);
+      --text:#1f2937; --muted:#6b7280; --brand:#3bb84a; --brand-dark:#2c9d39; --focus:#40a9ff;
+      --error:#ef4444; --success:#16a34a; --shadow: 0 20px 45px rgba(0,0,0,.20); --radius: 20px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{ margin:0; color:var(--text); font-family:'Inter','Microsoft YaHei',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      background:linear-gradient(135deg,var(--bg1),var(--bg2)); display:grid; place-items:center; padding:24px;}
+    .bg-decor{ position:fixed; inset:0; pointer-events:none; z-index:-1; background-image:
+      radial-gradient(1000px 500px at 15% 10%, rgba(255,255,255,.18), transparent 60%),
+      radial-gradient(800px 400px at 85% 90%, rgba(255,255,255,.16), transparent 60%); }
+    .shell{ width:min(100%,1040px); backdrop-filter:saturate(150%) blur(10px);
+      background:linear-gradient(180deg,rgba(255,255,255,.92),rgba(255,255,255,.85));
+      border:1px solid var(--card-border); border-radius:var(--radius); box-shadow:var(--shadow);
+      display:grid; grid-template-columns:1.05fr .95fr; overflow:hidden;}
+    .illustration{ position:relative; padding:36px; background:linear-gradient(180deg,#e7f7ff,#f3fbff);
+      display:flex; align-items:center; justify-content:center;}
+    .illu-wrap{ width:100%; max-width:520px; aspect-ratio:4/3; position:relative;}
+    .illu-card{ position:absolute; left:6%; top:10%; width:54%; height:48%; background:white; border-radius:16px;
+      box-shadow:0 12px 30px rgba(0,0,0,.15); border:1px solid #eef2ff; transform:rotate(-4deg);
+      display:flex; align-items:center; justify-content:center;}
+    .illu-card:nth-child(2){ left:auto; right:6%; bottom:8%; width:58%; height:50%; transform:rotate(5deg);}
+    .illu-card svg{ width:70%; height:auto;}
+    .illu-badge{ position:absolute; right:10%; top:8%; background:linear-gradient(135deg,#34d399,#10b981);
+      color:#fff; padding:8px 12px; border-radius:999px; font-weight:700; font-size:13px; box-shadow:0 6px 16px rgba(16,185,129,.35);}
+    .logo{ position:absolute; left:26px; top:22px; display:flex; align-items:center; gap:10px; font-weight:800; color:#0f172a;}
+    .logo svg{ width:26px; height:26px}
+    .form{ padding:48px 44px; display:flex; flex-direction:column; gap:22px;}
+    .title{ font-size:26px; font-weight:800; letter-spacing:.2px; margin-bottom:6px;}
+    .subtitle{ color:var(--muted); margin:0 0 12px 0;}
+    .field{ display:flex; flex-direction:column; gap:8px;}
+    .label{ font-size:14px; color:#374151; font-weight:600;}
+    .input-wrap{ position:relative}
+    .input{ width:100%; padding:12px 40px; border-radius:14px; border:1px solid #e5e7eb; background:rgba(255,255,255,.9);
+      outline:none; font-size:15px; transition:.2s border,.2s box-shadow,.2s background;}
+    .input:focus{ border-color:var(--focus); box-shadow:0 0 0 3px rgba(64,169,255,.18); background:#fff;}
+    .icon{ position:absolute; left:12px; top:50%; transform:translateY(-50%); width:18px; height:18px; opacity:.7;}
+    .toggle-eye{ position:absolute; right:12px; top:50%; transform:translateY(-50%); width:20px; height:20px; cursor:pointer; opacity:.7;}
+    .btn{ margin-top:4px; padding:12px; border:none; border-radius:14px; font-weight:700; font-size:16px;
+      background:linear-gradient(135deg,var(--brand),#73d13d); color:#fff; cursor:pointer; transition:.2s transform,.3s filter;}
+    .btn:hover{ transform:translateY(-2px); filter:brightness(1.05);}
+    .btn:active{ transform:translateY(0);}
+    .tip{ min-height:20px; font-size:14px; color:var(--error); text-align:center;}
+    .links{ display:flex; justify-content:space-between; font-size:14px;}
+    .links a{ color:#1677ff; text-decoration:none;}
+    .divider{ display:flex; align-items:center; gap:10px; color:#94a3b8; font-size:12px;}
+    .divider::before,.divider::after{ content:""; flex:1; height:1px; background:linear-gradient(90deg,transparent,#e5e7eb,transparent);}
+    @media (max-width:920px){ .shell{ grid-template-columns:1fr;} .illustration{ display:none;} body{ padding:16px;} .form{ padding:34px 22px;}}
+  </style>
+</head>
+<body>
+  <div class="bg-decor"></div>
+  <main class="shell" aria-label="登录卡片">
+    <section class="illustration" aria-hidden="true">
+      <div class="logo" title="Study Portal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 12l-10 7L2 12l10-7 10 7z"/><path d="M22 12v5"/><path d="M12 19v-5"/>
+        </svg>
+        海外留学APP
+      </div>
+      <div class="illu-wrap">
+        <div class="illu-card">
+          <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="16" y="24" width="88" height="72" rx="12" fill="#f8fafc" stroke="#e2e8f0"/>
+            <rect x="28" y="36" width="64" height="8" rx="4" fill="#cbd5e1"/>
+            <rect x="28" y="52" width="44" height="8" rx="4" fill="#94a3b8"/>
+            <rect x="28" y="68" width="52" height="8" rx="4" fill="#cbd5e1"/>
+          </svg>
+        </div>
+        <div class="illu-card">
+          <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="60" cy="60" r="40" fill="#f1f5f9" stroke="#e2e8f0"/>
+            <path d="M60 20 A40 40 0 0 1 100 60 L60 60 Z" fill="#86efac"/>
+            <path d="M60 60 L100 60 A40 40 0 0 1 51 98 Z" fill="#bae6fd"/>
+          </svg>
+        </div>
+        <div class="illu-badge">Welcome Back</div>
+      </div>
+    </section>
+
+    <section class="form">
+      <header>
+        <div class="title">登录到你的账号</div>
+        <div class="subtitle">继续学习之旅 ✨</div>
+      </header>
+
+      <div class="field">
+        <label class="label" for="email">邮箱</label>
+        <div class="input-wrap">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16v16H4z" opacity=".08"/><path d="M4 8l8 6 8-6"/><rect x="4" y="4" width="16" height="16" rx="2" ry="2"/>
+          </svg>
+          <input id="email" class="input" type="email" placeholder="请输入邮箱" autocomplete="email" required />
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label" for="password">密码</label>
+        <div class="input-wrap">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          <input id="password" class="input" type="password" placeholder="请输入密码" autocomplete="current-password" required />
+          <svg id="toggleEye" class="toggle-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" title="显示/隐藏密码">
+            <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z"/><circle cx="12" cy="12" r="3"/>
+          </svg>
+        </div>
+      </div>
+
+      <button id="login-btn" class="btn" aria-label="登录">登录</button>
+      <div id="login-tip" class="tip" role="status" aria-live="polite"></div>
+      <div class="divider">或</div>
+      <div class="links">
+        <a href="register.html">没有账号？去注册</a>
+        <a href="#" onclick="alert('请联系管理员重置密码');return false;">忘记密码？</a>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const API_BASE = 'http://127.0.0.1:3001/api';
+
+  const emailEl = document.getElementById('email');
+  const passwordEl = document.getElementById('password');
+  const tipEl = document.getElementById('login-tip');
+  const btn = document.getElementById('login-btn');
+  const toggleEye = document.getElementById('toggleEye');
+
+  toggleEye.addEventListener('click', () => {
+    const isPwd = passwordEl.type === 'password';
+    passwordEl.type = isPwd ? 'text' : 'password';
+    toggleEye.style.opacity = isPwd ? 1 : .7;
+  });
+
+  async function fetchMeSafely(){
+    try{
+      const res = await fetch(`${API_BASE}/users/me`, { credentials:'include' });
+      if(!res.ok) return null;
+      return await res.json();
+    }catch{ return null; }
+  }
+
+  async function doLogin(){
+    const email = emailEl.value.trim();
+    const password = passwordEl.value.trim();
+    tipEl.style.color = 'var(--error)';
+    tipEl.textContent = '';
+
+    if(!email || !password){
+      tipEl.textContent = '请填写邮箱和密码';
+      return;
+    }
+
+    try{
+      const res = await fetch(`${API_BASE}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ email, password })
+      });
+
+      // 尝试解析后端返回体（可能包含 user）
+      const data = await res.json().catch(()=> ({}));
+
+      if(res.ok){
+        tipEl.style.color = 'var(--success)';
+        tipEl.textContent = data.msg || '登录成功';
+
+        // —— 关键新增：写入最新登录用户到 localStorage ——
+        // 优先使用 /login 返回的 data.user；若没有，则回退请求 /users/me 获取
+        const freshUser = data.user || await fetchMeSafely();
+
+        if (freshUser) {
+          // 清理所有旧的用户缓存
+          ['currentUser', 'user', 'USER', 'auth_user', 'tempUser'].forEach(k => localStorage.removeItem(k));
+          // 写入新的用户信息
+          localStorage.setItem('currentUser', JSON.stringify(freshUser));
+        }
+
+        // 成功后跳转主页（保持你的原有跳转）
+        setTimeout(() => location.href = 'main page.html', 600);
+      }else{
+        tipEl.textContent = data.msg || '邮箱或密码不正确';
+      }
+    }catch(err){
+      console.error(err);
+      tipEl.textContent = '网络错误，请确认后端已启动 (http://127.0.0.1:3001)';
+    }
+  }
+
+  btn.addEventListener('click', doLogin);
+  document.addEventListener('keydown', (e)=>{ if(e.key==='Enter') doLogin(); });
+  </script>
+</body>
+</html>

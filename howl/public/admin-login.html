@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>后台登录</title>
+  <style>
+    :root{--bg:#0b0f14;--panel:#ffffff;--text:#0f172a;--muted:#64748b;--accent:#16a34a;--danger:#ef4444;--border:#e5e7eb;--shadow:0 10px 30px rgba(0,0,0,.18);--radius:18px}
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:'Microsoft YaHei',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,'PingFang SC',sans-serif;
+      background:
+        radial-gradient(1200px 600px at 10% -10%,#1f8db8 18%, transparent 60%),
+        radial-gradient(900px 500px at 110% 110%,#2bb8d6 12%, transparent 60%),
+        var(--bg);
+      color:#fff;
+    }
+    .wrap{min-height:100vh;display:grid;place-items:center;padding:24px}
+    .card{
+      width:min(420px,96vw);
+      background:var(--panel);
+      color:var(--text);
+      border:1px solid var(--border);
+      border-radius:18px;
+      box-shadow:0 10px 30px rgba(0,0,0,.18);
+      overflow:hidden;
+    }
+    .head{
+      padding:16px 18px;
+      border-bottom:1px solid var(--border);
+      display:flex;align-items:center;gap:12px;
+    }
+    .logo{
+      width:36px;height:36px;border-radius:10px;display:grid;place-items:center;
+      background:#0f172a;color:#fff;border:1px solid rgba(255,255,255,.2);
+      box-shadow:0 6px 18px rgba(0,0,0,.28);
+      font-size:18px;
+    }
+    h1{margin:0;font-size:18px}
+    .body{padding:18px}
+    .field{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+    .field label{font-size:12px;color:#334155}
+    .field input{
+      border:1px solid var(--border);
+      border-radius:12px;padding:12px 14px;font-size:14px;outline:none;
+      background:#fff;color:#111827;
+    }
+    .row{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      cursor:pointer;border:1px solid var(--border);background:#0f172a;color:#fff;
+      border-radius:12px;padding:10px 14px;font-weight:700;transition:.15s;width:100%;
+    }
+    .btn:hover{filter:brightness(1.05)}
+    .muted{color:#64748b;font-size:12px}
+    .error{color:#b91c1c;background:#fee2e2;border:1px solid #fecaca;padding:8px 10px;border-radius:10px;display:none}
+    .success{color:#166534;background:#f0fdf4;border:1px solid #bbf7d0;padding:8px 10px;border-radius:10px;display:none}
+    .foot{padding:12px 18px;border-top:1px solid var(--border);background:#fafafa;color:#334155;font-size:12px}
+    .remember{display:flex;align-items:center;gap:8px}
+    .links{display:flex;gap:10px;justify-content:flex-end}
+    a{color:#0f172a;text-decoration:none}
+    a:hover{text-decoration:underline}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <form class="card" id="loginForm" novalidate>
+      <div class="head">
+        <div class="logo">⚙️</div>
+        <h1>后台登录</h1>
+      </div>
+      <div class="body">
+        <div id="err" class="error"></div>
+        <div id="ok" class="success"></div>
+        <div class="field">
+          <label for="email">邮箱</label>
+          <input id="email" name="email" type="email" placeholder="admin@example.com" required/>
+        </div>
+        <div class="field">
+          <label for="password">密码</label>
+          <input id="password" name="password" type="password" placeholder="请输入密码" required minlength="6"/>
+        </div>
+        <div class="row" style="margin:6px 0 12px">
+          <label class="remember"><input type="checkbox" id="remember"/> 记住我</label>
+          <div class="links">
+            <a href="javascript:void(0)" id="forgot">忘记密码?</a>
+          </div>
+        </div>
+        <button class="btn" type="submit">登录</button>
+<button class="btn" type="button" id="registerBtn" style="margin-top:10px;background:#16a34a">注册账号</button>
+      </div>
+      <div class="foot">
+        登录成功后将跳转到 <code>admin-all.html</code>（全站管理）。
+      </div>
+    </form>
+  </div>
+
+  <script>
+    const API_BASE = 'http://127.0.0.1:3001';
+    const NEXT_URL = 'admin-all.html';
+
+    function show(el, msg){ el.textContent = msg; el.style.display = 'block'; }
+    function hide(el){ el.style.display = 'none'; el.textContent=''; }
+
+    async function apiLogin(email, password){
+      // 优先尝试标准登录端点
+      try{
+        const r = await fetch(API_BASE + '/api/auth/login', {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          credentials:'include',
+          body: JSON.stringify({ email, password })
+        });
+        if(!r.ok) throw new Error(await r.text());
+        return await r.json();
+      }catch(e1){
+        // 回退：有些服务把登录放在 /api/login
+        const r2 = await fetch(API_BASE + '/api/login', {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          credentials:'include',
+          body: JSON.stringify({ email, password })
+        });
+        if(!r2.ok) throw new Error(await r2.text());
+        return await r2.json();
+      }
+    }
+
+    function saveUser(user, remember){
+      try{
+        // 管理员使用专门的localStorage键，避免覆盖普通用户信息
+        const key = remember ? 'adminUser' : 'tempAdminUser';
+        localStorage.setItem(key, JSON.stringify(user||{}));
+        // 不设置普通用户的键名，避免冲突
+      }catch{}
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const err = document.getElementById('err');
+      const ok = document.getElementById('ok');
+      hide(err); hide(ok);
+
+      const email = (document.getElementById('email').value||'').trim();
+      const password = document.getElementById('password').value||'';
+      const remember = document.getElementById('remember').checked;
+
+      if(!email || !password){
+        show(err, '请填写邮箱和密码'); return;
+      }
+      try{
+        const data = await apiLogin(email, password);
+// 期望后端返回 { user, token? }；这里做兼容
+const user = data.user || data || { email };
+// 管理员校验：要求后端返回 isAdmin=true（见 server.js 登录接口）
+if (!(user && (user.isAdmin === true || user.role === 'admin'))) {
+  show(err, '该账号不是管理员，无法进入后台');
+  return;
+}
+saveUser(user, remember);
+show(ok, '登录成功，正在跳转…');
+setTimeout(()=> location.href = NEXT_URL, 600);
+      }catch(ex){
+        show(err, '登录失败：' + (String(ex.message||ex).slice(0,200)));
+      }
+    });
+
+    document.getElementById('forgot').addEventListener('click', async ()=>{
+      const email = prompt('请输入注册邮箱，我们将发送重置说明：');
+      if(!email) return;
+      try{
+        // 尝试常见两种路径
+        let sent = false;
+        try{
+          const r1 = await fetch(API_BASE + '/api/auth/forgot-password', {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({ email })
+          });
+          if(r1.ok) sent = true;
+        }catch{}
+        if(!sent){
+          const r2 = await fetch(API_BASE + '/api/forgot-password', {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({ email })
+          });
+          if(r2.ok) sent = true;
+        }
+        alert(sent ? '邮件已发送（如未收到，请检查垃圾箱）' : '发送失败，请联系管理员');
+      }catch{ alert('发送失败，请联系管理员'); }
+    });
+  
+    async function apiRegister(email, password, nickname){
+      const r = await fetch(API_BASE + '/api/register', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ email, password, nickname, isAdmin: true })
+      });
+      if(!r.ok) throw new Error(await r.text());
+      return r.json();
+    }
+
+    const regBtn = document.getElementById('registerBtn');
+    if (regBtn){
+      regBtn.addEventListener('click', async ()=>{
+        const email = prompt('请输入邮箱：');
+        if(!email) return;
+        const password = prompt('请输入密码（至少6位）：');
+        if(!password) return;
+        const nickname = prompt('请输入昵称（可选）：') || '';
+        try{
+          const data = await apiRegister(email.trim(), password.trim(), nickname.trim());
+          alert('注册成功！请返回登录。');
+        }catch(ex){
+          alert('注册失败：' + (String(ex.message||ex).slice(0,200)));
+        }
+      });
+    }
+    
+</script>
+</body>
+</html>

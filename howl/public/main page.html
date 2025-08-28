@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>海外留学 · 主页面</title>
+  <style>
+    :root{
+      --bg:#0b0f14;
+      --panel:#ffffff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --accent:#16a34a;
+      --accent-2:#22c55e;
+      --border:#e5e7eb;
+      --shadow:0 10px 30px rgba(0,0,0,.18);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:'Microsoft YaHei',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,'PingFang SC',sans-serif;background:radial-gradient(1200px 600px at 10% -10%,#1f8db8 18%, transparent 60%),radial-gradient(900px 500px at 110% 110%,#2bb8d6 12%, transparent 60%), var(--bg);color:#fff}
+
+    .container{display:grid;grid-template-columns: 220px 1fr;grid-template-rows: 220px 1fr;gap:18px;min-height:100vh;padding:24px}
+
+    .sidebar{grid-row:1/3;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px 16px;color:var(--text);display:flex;flex-direction:column;gap:16px}
+    .account-info{display:flex;flex-direction:column;align-items:center;gap:10px;text-decoration:none;color:inherit;border:1px dashed #eef2ff;border-radius:14px;padding:14px;background:#fff}
+    .avatar{width:56px;height:56px;border-radius:50%;object-fit:cover}
+    .username{font-weight:700}
+
+    .nav-list{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:10px}
+    .nav-list li{display:block}
+    .nav-list a{display:flex;align-items:center;gap:10px;justify-content:flex-start;text-decoration:none;color:var(--text);border:1px solid var(--border);background:#fafafa;border-radius:12px;padding:10px 14px;transition:.2s background,.2s transform}
+    .nav-list a:hover{background:#f3f4f6;transform:translateY(-1px)}
+    .nav-icon{width:22px;display:inline-flex;justify-content:center}
+
+    .Welcome{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;color:var(--text);font-size:48px;font-weight:800}
+
+    .dropdown{position:absolute;top:28px;right:32px;z-index:10}
+    .dropdown-btn{background:#fff;color:#111827;border:1px solid var(--border);border-radius:12px;padding:8px 14px;cursor:pointer;font-weight:700}
+    .dropdown-list{position:absolute;right:0;margin-top:8px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:8px 0;list-style:none;display:none;min-width:160px;box-shadow:var(--shadow)}
+    .dropdown-list li{border-bottom:1px solid #f1f5f9}
+    .dropdown-list li:last-child{border-bottom:none}
+    .dropdown-list a{display:block;padding:10px 14px;color:#111827;text-decoration:none}
+    .dropdown-list a:hover{background:#f3f4f6}
+
+    .text{position:relative;background:#0b1220;border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;padding:28px;line-height:1.8;font-size:20px;text-align:center}
+    .text::before{content:"";position:absolute;inset:0;border-radius:inherit;background:url('https://github.com/WH-An/-APP/blob/main/main%20page/%E8%93%9D%E9%BB%84%E5%B0%8F%E5%B8%86%E8%88%B9.png?raw=1') center/cover no-repeat;opacity:.18}
+    .text>span{position:relative;z-index:1;max-width:70ch}
+
+    @media (max-width: 960px){
+      .container{grid-template-columns: 1fr;grid-template-rows:auto auto 1fr}
+      .sidebar{grid-row:auto}
+      .Welcome{font-size:32px;padding:18px}
+      .dropdown{position:static;justify-self:end}
+    }
+
+    #chatFab{
+      position: fixed;
+      left: 16px; bottom: 16px;
+      width: 48px; height: 48px; border-radius: 9999px;
+      display: flex; align-items: center; justify-content: center;
+      background: #0f172a; color: #fff; border: 1px solid rgba(255,255,255,.15);
+      box-shadow: 0 10px 24px rgba(0,0,0,.28);
+      cursor: pointer; user-select: none; z-index: 9999;
+      transition: transform .15s ease, box-shadow .15s ease, opacity .2s ease;
+    }
+    #chatFab:hover{ transform: translateY(-1px); box-shadow: 0 14px 28px rgba(0,0,0,.32); }
+    #chatFab:active{ transform: translateY(0); box-shadow: 0 8px 18px rgba(0,0,0,.26); }
+    #chatFab .badge{
+      position: absolute; right: -2px; top: -2px;
+      min-width: 18px; height: 18px; padding: 0 5px;
+      display: none; align-items: center; justify-content: center;
+      background: #ef4444; color: #fff; border-radius: 9999px;
+      font-size: 11px; line-height: 18px; box-shadow: 0 2px 6px rgba(0,0,0,.18);
+    }
+    @media (max-width: 480px){
+      #chatFab{ left: 12px; bottom: 12px; width: 44px; height: 44px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="sidebar">
+      <a class="account-info" href="profile.html">
+        <img src="your-avatar.png" alt="头像" class="avatar">
+        <span class="username">用户名</span>
+      </a>
+      <ul class="nav-list">
+        <li><a href="main page.html"><span class="nav-icon">🏠</span><span class="nav-text">主页</span></a></li>
+        <li><a href="life-tips.html"><span class="nav-icon">💡</span><span class="nav-text">生活小贴士</span></a></li>
+        <li><a href="study-guide.html"><span class="nav-icon">📚</span><span class="nav-text">学习指导</span></a></li>
+        <li><a href="enrollment-steps.html"><span class="nav-icon">📝</span><span class="nav-text">入学步骤</span></a></li>
+        <li><a href="share.html"><span class="nav-icon">🔗</span><span class="nav-text">分享</span></a></li>
+        <li><a href="fun.html"><span class="nav-icon">🎉</span><span class="nav-text">娱乐</span></a></li>
+        <li><a href="hospital.html"><span class="nav-icon">🏥</span><span class="nav-text">医院</span></a></li>
+      </ul>
+    </div>
+
+    <div class="Welcome">欢迎使用海外留学APP</div>
+
+    <div class="dropdown">
+      <button class="dropdown-btn">地区 ▼</button>
+      <!-- 只替换这个 <ul> 就行 -->
+<ul class="dropdown-list">
+  <li><a href="#">全部</a></li>
+  <li><a href="#">马来西亚</a></li>
+  <li><a href="#">新加坡</a></li>
+  <li><a href="#">香港</a></li>
+</ul>
+
+    </div>
+
+    <div class="text">
+      <span>跨越海洋，不只是为了远方的风景，更是为了体验不同的思维方式。留学，是一场关于知识与文化的深度探索。</span>
+    </div>
+  </div>
+
+  <script>
+/* 登录后的用户信息渲染（优先从服务器获取最新信息） */
+(async function hydrateUser(){
+  try{
+    const avatarEl = document.querySelector('.avatar');
+    const nameEl   = document.querySelector('.username');
+
+    const FALLBACK_AVATAR_DATAURL =
+      'data:image/svg+xml;utf8,' +
+      encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#bbb"/><stop offset="100%" stop-color="#eee"/></linearGradient></defs><rect width="100%" height="100%" fill="url(#g)"/><circle cx="64" cy="54" r="26" fill="#fff"/><rect x="24" y="86" width="80" height="28" rx="14" fill="#fff"/></svg>`);
+
+    // 优先从服务器获取最新用户信息
+    try {
+      const response = await fetch('http://127.0.0.1:3001/api/users/me', { 
+        credentials: 'include' 
+      });
+      
+      if (response.ok) {
+        const user = await response.json();
+        const displayName = user.nickname || user.username || user.displayName || user.name || user.email || '我的账号';
+        let avatar = user.avatarPath || user.avatarUrl || user.avatar || '';
+
+        const explicit = window.BACKEND_ORIGIN && String(window.BACKEND_ORIGIN).trim();
+        const sameOrigin = location.origin && !/^file:/i.test(location.origin) ? location.origin : '';
+        const devFallback = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? 'http://localhost:3001' : '';
+        const BACKEND_ORIGIN = explicit || sameOrigin || devFallback;
+
+        if (avatar && !/^https?:\/\//i.test(avatar)) {
+          avatar = avatar.startsWith('/') ? (BACKEND_ORIGIN + avatar) : (BACKEND_ORIGIN + '/' + avatar);
+        }
+
+        if (nameEl) { nameEl.textContent = displayName; nameEl.title = displayName; }
+        if (avatarEl) { avatarEl.onerror = () => { avatarEl.src = FALLBACK_AVATAR_DATAURL; }; avatarEl.src = avatar || FALLBACK_AVATAR_DATAURL; avatarEl.alt = displayName || '我的头像'; }
+        
+        // 更新本地存储
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        return;
+      }
+    } catch (e) {
+      console.warn('从服务器获取用户信息失败，使用本地存储:', e);
+    }
+
+    // 如果服务器获取失败，回退到本地存储
+    const raw = localStorage.getItem('meUser')
+         || localStorage.getItem('currentUser')
+         || localStorage.getItem('user')
+         || localStorage.getItem('USER')
+         || localStorage.getItem('auth_user');
+
+    if(!raw){
+      if (nameEl)   nameEl.textContent = '我的账号';
+      if (avatarEl) { avatarEl.src = FALLBACK_AVATAR_DATAURL; avatarEl.alt = '我的头像'; }
+      return;
+    }
+
+    const u = JSON.parse(raw) || {};
+    const displayName = u.nickname || u.username || u.displayName || u.name || u.email || '我的账号';
+    let avatar = u.avatarPath || u.avatarUrl || u.avatar || '';
+
+    const explicit = window.BACKEND_ORIGIN && String(window.BACKEND_ORIGIN).trim();
+    const sameOrigin = location.origin && !/^file:/i.test(location.origin) ? location.origin : '';
+    const devFallback = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? 'http://localhost:3001' : '';
+    const BACKEND_ORIGIN = explicit || sameOrigin || devFallback;
+
+    if (avatar && !/^https?:\/\//i.test(avatar)) {
+      avatar = avatar.startsWith('/') ? (BACKEND_ORIGIN + avatar) : (BACKEND_ORIGIN + '/' + avatar);
+    }
+
+    if (nameEl) { nameEl.textContent = displayName; nameEl.title = displayName; }
+    if (avatarEl) { avatarEl.onerror = () => { avatarEl.src = FALLBACK_AVATAR_DATAURL; }; avatarEl.src = avatar || FALLBACK_AVATAR_DATAURL; avatarEl.alt = displayName || '我的头像'; }
+  }catch(e){ 
+    console.error('用户信息渲染失败:', e);
+    // 设置默认值
+    const avatarEl = document.querySelector('.avatar');
+    const nameEl = document.querySelector('.username');
+    if (nameEl) nameEl.textContent = '我的账号';
+    if (avatarEl) avatarEl.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#bbb"/><stop offset="100%" stop-color="#eee"/></linearGradient></defs><rect width="100%" height="100%" fill="url(#g)"/><circle cx="64" cy="54" r="26" fill="#fff"/><rect x="24" y="86" width="80" height="28" rx="14" fill="#fff"/></svg>`);
+  }
+})();
+
+/* 消息悬浮按钮（保持你原逻辑） */
+(function(){
+  const BASE_URL = 'http://127.0.0.1:3001';
+  const MESSAGES_PATH = '/public/messages.html';
+
+  let fab = document.getElementById('chatFab');
+  if(!fab){
+    fab = document.createElement('button');
+    fab.id = 'chatFab';
+    fab.setAttribute('aria-label','消息');
+    fab.title = '消息';
+    fab.innerHTML = '💬';
+    const badge = document.createElement('span'); badge.className = 'badge'; fab.appendChild(badge);
+    fab.addEventListener('click', ()=> location.href = MESSAGES_PATH);
+    document.body.appendChild(fab);
+  }
+  const badgeEl = fab.querySelector('.badge');
+
+  const READ_KEY = (me, peer) => `read:${(me||'').toLowerCase()}::${(peer||'').toLowerCase()}`;
+  async function apiMe(){ const r = await fetch(BASE_URL + '/api/users/me', { credentials:'include' }); if(!r.ok) throw 0; return r.json(); }
+  async function apiThreads(){ const r = await fetch(BASE_URL + '/api/messages/threads', { credentials:'include' }); if(!r.ok) throw 0; return r.json(); }
+  async function apiDialog(peer){ const r = await fetch(BASE_URL + '/api/messages?peer=' + encodeURIComponent(peer), { credentials:'include' }); if(!r.ok) throw 0; return r.json(); }
+  async function computeUnreadTotal(){
+    let me; try { me = await apiMe(); } catch { setBadge(0); return; }
+    const meMail = (me.email||'').toLowerCase();
+    let total = 0, threads = [];
+    try { threads = await apiThreads(); } catch { setBadge(0); return; }
+    for(const t of threads){
+      const peer = (t.peer||'').trim();
+      try{
+        const msgs = await apiDialog(peer);
+        const lastReadISO = localStorage.getItem(READ_KEY(meMail, peer.toLowerCase())) || '1970-01-01T00:00:00.000Z';
+        const lastRead = new Date(lastReadISO);
+        total += msgs.filter(m => String(m.to||'').toLowerCase() === meMail && new Date(m.time) > lastRead).length;
+      }catch{}
+    }
+    setBadge(total);
+  }
+  function setBadge(n){ if(!badgeEl) return; if(n>0){ badgeEl.style.display='flex'; badgeEl.textContent = n>99?'99+':String(n); } else { badgeEl.style.display='none'; } }
+  computeUnreadTotal(); let timer = setInterval(computeUnreadTotal, 15000);
+  document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState === 'visible') computeUnreadTotal(); });
+  window.addEventListener('beforeunload', ()=> clearInterval(timer));
+})();
+
+/* 主页：地区选择（阻止跳转→保存到 localStorage→广播），不改结构/样式 */
+(function(){
+  const btn  = document.querySelector('.dropdown-btn');
+  const list = document.querySelector('.dropdown-list');
+  if(!btn || !list) return;
+
+  const REGION_KEY = 'region';
+  const DEFAULT_REGION = '全部';
+  const baseBtnText = (btn.textContent || '').replace(/（.*?）/g,'').trim();
+
+  function updateBtn(region){ btn.textContent = `${baseBtnText}（${region}）`; }
+  function setRegion(region){
+    const value = (region || '').trim() || DEFAULT_REGION;
+    localStorage.setItem(REGION_KEY, value);
+    updateBtn(value);
+    document.dispatchEvent(new CustomEvent('regionchange', { detail:{ region:value } }));
+  }
+
+  // 初始化：保证默认是“全部”，并同步按钮
+  if(!localStorage.getItem(REGION_KEY)){ localStorage.setItem(REGION_KEY, DEFAULT_REGION); }
+  updateBtn(localStorage.getItem(REGION_KEY) || DEFAULT_REGION);
+
+  // 展开/收起（只切 display）
+  btn.addEventListener('click', (e)=>{
+    e.stopPropagation();
+    const show = getComputedStyle(list).display === 'none';
+    list.style.display = show ? 'block' : 'none';
+  });
+  document.addEventListener('click', ()=> list.style.display = 'none');
+
+  // 拦截 a 的默认跳转，用其文本作为地区；提高优先级避免旧监听抢先
+  list.querySelectorAll('a').forEach(a=>{
+    a.addEventListener('click', (e)=>{
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      const region = (a.textContent || '').trim();
+      setRegion(region);
+      list.style.display = 'none';
+      return false;
+    }, { capture:true });
+  });
+})();
+
+(function(){
+  const REGION_KEY = 'region';
+  const DEFAULT_REGION = '全部';
+  const API_BASE = 'http://127.0.0.1:3001';
+  const ITEM_SELECTOR = '.card';
+  const LIST = document.getElementById('masonry');
+
+  const norm = s => String(s||'').replace(/\s+/g,'').toLowerCase();
+  const getRegion = () => localStorage.getItem(REGION_KEY) || DEFAULT_REGION;
+
+  const areaMap = new Map();
+  async function fetchAreaByEmail(email){
+    const key = (email||'').trim().toLowerCase();
+    if(!key) return '';
+    if(areaMap.has(key)) return areaMap.get(key);
+    try{
+      const r = await fetch(`${API_BASE}/api/users/by-email?email=${encodeURIComponent(key)}`, { credentials:'include' });
+      if(!r.ok){ areaMap.set(key,''); return ''; }
+      const u = await r.json(); const area = (u.area || '').trim();
+      areaMap.set(key, area); return area;
+    }catch{ areaMap.set(key,''); return ''; }
+  }
+  async function preloadAreas(posts){
+    const emails = [...new Set((posts||[]).map(p => (p.authorEmail||'').trim().toLowerCase()).filter(Boolean))];
+    await Promise.all(emails.map(fetchAreaByEmail));
+  }
+  async function applyRegionFilter(posts){
+    const want = norm(getRegion());
+    const cards = Array.from(document.querySelectorAll(ITEM_SELECTOR));
+    const n = Math.min(cards.length, (posts||[]).length);
+    if(n===0) return;
+    await preloadAreas(posts);
+    let shown = 0;
+    for(let i=0;i<n;i++){
+      const card = cards[i], post = posts[i]||{}, email = (post.authorEmail||'').trim().toLowerCase();
+      if(want===norm(DEFAULT_REGION) || !email || !(areaMap.get(email)||'')){
+        card.style.display=''; card.setAttribute('aria-hidden','false'); shown++; continue;
+      }
+      const hit = norm(areaMap.get(email)).includes(want);
+      card.style.display = hit ? '' : 'none';
+      card.setAttribute('aria-hidden', hit ? 'false' : 'true');
+      if(hit) shown++;
+    }
+    const counter = document.querySelector('#resultCount'); if(counter) counter.textContent = String(shown);
+  }
+  const _origRenderPosts = window.renderPosts;
+  if(typeof _origRenderPosts === 'function'){
+    window.renderPosts = function(posts){ _origRenderPosts(posts); window.__renderedPosts__ = posts||[]; applyRegionFilter(window.__renderedPosts__); };
+  }
+  document.addEventListener('regionchange', ()=> applyRegionFilter(window.__renderedPosts__||[]));
+  if(window.MutationObserver && LIST){
+    const mo = new MutationObserver(()=> applyRegionFilter(window.__renderedPosts__||[]));
+    mo.observe(LIST, { childList:true, subtree:false });
+  }
+})();
+
+  </script>
+</body>
+</html>
