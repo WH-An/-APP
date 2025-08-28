@@ -1,0 +1,133 @@
+[
+  {
+    "id": 1755350721467,
+    "nickname": "An",
+    "email": "an69760925@gmail.com",
+    "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+    "area": "马来西亚",
+    "degree": "本科",
+    "avatarPath": "/uploads/1755350721460_an69760925@gmail.com.JPG"
+  },
+  {
+    "id": 1755350812953,
+    "nickname": "An",
+    "email": "anjunli@gmail.com",
+    "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+    "area": "马来西亚",
+    "degree": "本科",
+    "avatarPath": "/uploads/1755350812949_anjunli@gmail.com.JPG"
+  },
+  {
+    "id": 1755358847321,
+    "nickname": "Li",
+    "email": "a@123.com",
+    "password": "123",
+    "area": "马来西亚",
+    "degree": "硕士",
+    "avatarPath": "/uploads/1755432571769-31f051b9aa9408.jpg"
+  },
+  {
+    "id": 1755359039365,
+    "nickname": "oo",
+    "email": "l@123.com",
+    "password": "123",
+    "area": "香港",
+    "degree": "本科",
+    "avatarPath": "/uploads/1755416553774-76802b02dee398.JPG"
+  },
+  {
+    "id": 1755359098076,
+    "nickname": "kk",
+    "email": "kk@123.com",
+    "password": "123",
+    "area": "新加坡",
+    "degree": "本科",
+    "avatarPath": ""
+  },
+  {
+    "id": 1755420535843,
+    "nickname": "nm",
+    "email": "an@zuiniu.com",
+    "password": "123",
+    "area": "新加坡",
+    "degree": "本科",
+    "avatarPath": "/uploads/1755420553467-fe85366671639.jpg"
+  },
+  {
+    "id": 1755941289832,
+    "nickname": "AN",
+    "email": "admin@lxwz.com",
+    "password": "Anjunli@1029",
+    "area": "",
+    "degree": "",
+    "avatarPath": ""
+  },
+  {
+    "id": 1755942758673,
+    "nickname": "123",
+    "email": "123@123.123",
+    "password": "123456",
+    "area": "",
+    "degree": "",
+    "avatarPath": ""
+  },
+  {
+    "id": 1755944311929,
+    "nickname": "123456",
+    "email": "admin@123.com",
+    "password": "123456",
+    "area": "",
+    "degree": "",
+    "avatarPath": ""
+  },
+  {
+    "id": 1755945803503,
+    "nickname": "asd",
+    "email": "asd@asd.com",
+    "password": "asdasd",
+    "area": "",
+    "degree": "",
+    "avatarPath": ""
+  },
+  {
+    "id": "admin",
+    "email": "hwlx@hwlx.com",
+    "password": "hwlx",
+    "nickname": "海外留学",
+    "role": "admin",
+    "createdAt": "2025-08-24T06:00:00.000Z",
+    "avatar": "/uploads/1756022568733-6f937f295a8b58.png",
+    "avatarUrl": "/uploads/1756022568733-6f937f295a8b58.png",
+    "avatarPath": "/uploads/1756022568733-6f937f295a8b58.png"
+  },
+  {
+    "id": 1756019686510,
+    "nickname": "新管理员",
+    "email": "newadmin@test.com",
+    "password": "123456",
+    "area": "",
+    "degree": "",
+    "avatarPath": "",
+    "isAdmin": true
+  },
+  {
+    "id": 1756019755380,
+    "nickname": "admin1",
+    "email": "admin1@qq.com",
+    "password": "admin1",
+    "area": "",
+    "degree": "",
+    "avatarPath": "/uploads/1756023195039-f4154d9f0ce25.png",
+    "isAdmin": true
+  },
+  {
+    "id": 1756022545646,
+    "nickname": "admin2",
+    "email": "admin2@qq.com",
+    "password": "admin2",
+    "area": "",
+    "degree": "",
+    "avatarPath": "",
+    "isAdmin": true
+  }
+]
